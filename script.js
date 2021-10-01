@@ -31,9 +31,9 @@ function processData() {
     let score = parseFloat(row["player_rating"]);
     scores.push(score);
 
-    if (i == allRows.length - 1 || parseFloat(score) > parseFloat(currentBin)) {
+    if (parseFloat(score) > parseFloat(currentBin)) {
       let avgPercentile = totalBinPercentile / binCount;
-      binPercentiles.push(avgPercentile);
+      binPercentiles.push(avgPercentile * 100);
       scoreCount.push(binCount);
       binCount = 0;
       totalBinPercentile = 0;
@@ -43,6 +43,11 @@ function processData() {
     totalBinPercentile += parseFloat(row["overall_percentile"]);
     binCount++;
   }
+
+  // add last percentile/bin
+  let avgPercentile = totalBinPercentile / binCount;
+  binPercentiles.push(avgPercentile * 100);
+  scoreCount.push(binCount);
 
   makePlotly(scores, scoreCount, binPercentiles);
 }
