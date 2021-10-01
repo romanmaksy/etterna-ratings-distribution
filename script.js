@@ -1,90 +1,75 @@
-let binSize = 1;
-let allRows = [];
-
 let binSizeInput = document.querySelector("#binSizeInput");
 binSizeInput.addEventListener("change", onBinSizeChange);
 
+let binSize = parseFloat(binSizeInput.value);
+let allRows = [];
+
 function onBinSizeChange(e) {
-  binSize = parseFloat(e.target.value);
-  processData();
+	binSize = parseFloat(e.target.value);
+	processData();
 }
 
 function readCSV() {
-  console.log(window.location.pathname + window.location.search);
-  Plotly.d3.csv("./etternaRatings.csv", function (data) {
-    allRows = data;
-    processData();
-  });
+	Plotly.d3.csv("./etternaRatings.csv", function (data) {
+		allRows = data;
+		processData();
+	});
 }
 
 function processData() {
-  let currentBin = binSize;
-  let binCount = 0;
-  let totalBinPercentile = 0;
+	let currentBin = binSize;
+	let scores = [];
+	let binPercentiles = [];
 
-  let scores = [];
-  let scoreCount = [];
-  let binPercentiles = [];
+	for (var i = 0; i < allRows.length; i++) {
+		let row = allRows[i];
+		let score = parseFloat(row["player_rating"]);
+		scores.push(score);
 
-  for (var i = 0; i < allRows.length; i++) {
-    let row = allRows[i];
-    let score = parseFloat(row["player_rating"]);
-    scores.push(score);
+		// add percentile text for each bin, including empty bins
+		while (parseFloat(score.toFixed(2)) > parseFloat(currentBin.toFixed(2))) {
+			binPercentiles.push(parseFloat(allRows[i - 1]["overall_percentile"]) * 100);
+			currentBin += binSize;
+		}
+	}
 
-    if (parseFloat(score) > parseFloat(currentBin)) {
-      let avgPercentile = totalBinPercentile / binCount;
-      binPercentiles.push(avgPercentile * 100);
-      scoreCount.push(binCount);
-      binCount = 0;
-      totalBinPercentile = 0;
-      currentBin += binSize;
-    }
-
-    totalBinPercentile += parseFloat(row["overall_percentile"]);
-    binCount++;
-  }
-
-  // add last percentile/bin
-  let avgPercentile = totalBinPercentile / binCount;
-  binPercentiles.push(avgPercentile * 100);
-  scoreCount.push(binCount);
-
-  makePlotly(scores, scoreCount, binPercentiles);
+	// add last element
+	binPercentiles.push(100);
+	makePlotly(scores, binPercentiles);
 }
 
-function makePlotly(scores, scoreCount, binPercentiles) {
-  var plotDiv = document.getElementById("plot");
-  var trace = {
-    x: scores,
-    type: "histogram",
-    text: binPercentiles,
-    xbins: {
-      size: binSize,
-    },
-    hovertemplate:
-      "Num Players: %{y}<br>" +
-      "Rating: %{x}<br>" +
-      "Percentile: %{text:.2f}%<extra></extra>",
-  };
+function makePlotly(scores, binPercentiles) {
+	var plotDiv = document.getElementById("plot");
+	var trace = {
+		x: scores,
+		type: "histogram",
+		text: binPercentiles,
+		xbins: {
+			start: 0,
+			size: binSize,
+		},
+		hovertemplate:
+			"Num Players: %{y}<br>" + "Rating: %{x}<br>" + "Percentile: %{text:.2f}%<extra></extra>",
+	};
 
-  let data = [trace];
+	let data = [trace];
 
-  var layout = {
-    title: "Etterna overall rating distribution<br>last updated Oct 1 2021",
-    xaxis: {
-      title: {
-        text: "Overall Rating",
-      },
-      dtick: 5,
-    },
-    yaxis: {
-      title: {
-        text: "Player Count",
-      },
-    },
-  };
+	var layout = {
+		title: "Etterna overall rating distribution<br>last updated Oct 1 2021",
+		xaxis: {
+			title: {
+				text: "Overall Rating",
+			},
+			dtick: 5,
+		},
+		yaxis: {
+			title: {
+				text: "Player Count",
+			},
+		},
+	};
 
-  Plotly.newPlot("myDiv", data, layout, { responsive: true });
+	Plotly.newPlot("myDiv", data, layout, { responsive: true });
 }
 
 readCSV();
