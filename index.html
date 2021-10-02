@@ -1,24 +1,35 @@
 <head>
 	<script src="https://cdn.plot.ly/plotly-latest.min.js" defer></script>
 	<script src="./script.js" defer></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"/>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="romanmaksy" data-description="Support me on Buy me a coffee!" data-message="Thanks for checking this out, I hope you enjoy it! If you would like to say thanks, you can do so by clicking the cup to buy me a coffee!" data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+  <link rel="stylesheet" href="./style.css"/>
 </head>
 
 <body>
-	<div id="myDiv">
-		<!-- Plotly chart will be drawn inside this DIV -->
-	</div>
-	rating bin size
-	<input id="binSizeInput" type="number" min=".01" max="50" step="0.1" value="1" />
-	<script
-		data-name="BMC-Widget"
-		data-cfasync="false"
-		src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js"
-		data-id="romanmaksy"
-		data-description="Support me on Buy me a coffee!"
-		data-message="Thanks for checking this out, I hope you enjoy it! If you would like to say thanks, you can do so by clicking the cup to buy me a coffee!"
-		data-color="#FFDD00"
-		data-position="Right"
-		data-x_margin="18"
-		data-y_margin="18"
-	></script>
+  <div id="content">
+    <h1>Etterna Rating Distribution Viewer</h1>
+    <div id="chartCard">
+      <div id="plotlyChart">
+        <!-- Plotly chart will be drawn inside this DIV -->
+      </div>
+    </div>
+    <div id="graphControls">
+      <div id="binSizeControl" class="graphControl">rating bin size: <input id="binSizeInput" type="number" min=".01" max="40" step="0.1" value=".5"/></div>
+      <div id="skillSetControl" class="graphControl">
+        skillset: 
+      <select id="skillSetSelect">
+        <option value="player_rating">Overall</option>
+        <option value="Stream">Stream</option>
+        <option value="Jumpstream">Jumpstream</option>
+        <option value="Handstream">Handstream</option>
+        <option value="Stamina">Stamina</option>
+        <option value="JackSpeed">Jacks</option>
+        <option value="Chordjack">Chordjacks</option>
+        <option value="Technical">Technical</option>
+      </select>
+      </div>
+    </div>
+  </div>
 </body>
