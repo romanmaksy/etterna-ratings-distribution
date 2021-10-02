@@ -18,7 +18,10 @@ function onSkillSetChange(e) {
 	processData();
 }
 
-function readCSV() {
+async function readCSV() {
+	SlickLoader.enable();
+
+	// wrap load in timeout to make it async
 	Plotly.d3.csv("./etternaRatings.csv", function (data) {
 		allRows = data;
 		processData();
@@ -26,6 +29,8 @@ function readCSV() {
 }
 
 function processData() {
+	SlickLoader.enable();
+
 	let currentBin = binSize;
 	let scores = [];
 	let binPercentiles = [];
@@ -124,7 +129,14 @@ function makePlotly(scores, binPercentiles) {
 		},
 	};
 
-	Plotly.newPlot("plotlyChart", data, layout, { responsive: true });
+	let histogram = Plotly.newPlot("plotlyChart", data, layout, { responsive: true });
+
+	Promise.all([histogram]).then((values) => {
+		SlickLoader.disable();
+
+		let histogramDiv = values[0];
+		console.log(histogramDiv);
+	});
 }
 
 readCSV();
