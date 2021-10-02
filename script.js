@@ -38,7 +38,8 @@ function onPlayerHighlightChange(e) {
 }
 
 function onBinSizeChange(e) {
-	binSize = parseFloat(e.target.value);
+	binSize = Math.max(0.01, parseFloat(e.target.value));
+	binSizeInput.value = binSize;
 	processData();
 }
 
@@ -193,7 +194,7 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 	let tallestBinHeight = Math.max(...binInfos.map((binInfo) => binInfo.scoreCount));
 	let colors = [];
 	for (var i = 0; i < binInfos.length; i++) {
-		colors.push(playerToHighlight && i == playerToHighlight.binIndex ? "#7F916B" : "#7D6B91");
+		colors.push(playerToHighlight && i == playerToHighlight.binIndex ? "#7EC13E" : "#C13E7E");
 	}
 
 	var plotDiv = document.getElementById("plot");
@@ -210,7 +211,7 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 		marker: {
 			color: colors,
 			line: {
-				width: 1,
+				width: binSize > 0.1 ? 1 : 0,
 			},
 		},
 	};
@@ -257,7 +258,7 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 
 	if (showMedian) {
 		annotations.push({
-			text: `median: ${medianVal.toFixed(2)}`,
+			text: `Median: ${medianVal.toFixed(2)}`,
 			align: "left",
 			bgcolor: "rgba(0,0,0,0)",
 			x: medianVal,
@@ -279,7 +280,7 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 		const avg = sum / scores.length || 0;
 
 		annotations.push({
-			text: `avg: ${avg.toFixed(2)}`,
+			text: `Average: ${avg.toFixed(2)}`,
 			align: "left",
 			bgcolor: "rgba(0,0,0,0)",
 			x: avg,
@@ -297,16 +298,16 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 	}
 
 	if (playerToHighlight) {
-		let displayText = `${playerToHighlight.name} - ${
+		let displayText = `<b><i>${playerToHighlight.name}</i></b><br>${
 			skillSetSelect[skillSetSelect.selectedIndex].text
-		} rating: ${playerToHighlight.score.toFixed(
+		}: ${playerToHighlight.score.toFixed(2)}<br>Percentile: ${playerToHighlight.percentile.toFixed(
 			2
-		)}<br>percentile: ${playerToHighlight.percentile.toFixed(2)}%`;
+		)}%`;
 
 		annotations.push({
 			text: displayText,
 			align: "left",
-			bgcolor: "rgba(0,0,0,0)",
+			bgcolor: "rgba(0,0,0,.8)",
 			x: playerToHighlight.score,
 			y: playerToHighlight.barHeight,
 			ax: playerToHighlight.score + binSize + 0.1 * binSize * binInfos.length,

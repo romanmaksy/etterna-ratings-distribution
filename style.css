@@ -1,12 +1,17 @@
-/* .modebar {
+.modebar {
 	display: none !important;
-} */
+}
 
 body {
-	background-color: #4d072c;
+	background-color: #031926;
 	color: white;
 	margin: 20px;
 	overflow: hidden;
+	font-family: "Poppins", sans-serif;
+}
+
+h1 {
+	color: #fffffc;
 }
 
 #chartCard {
