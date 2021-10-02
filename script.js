@@ -8,10 +8,29 @@ binSizeInput.addEventListener("change", onBinSizeChange);
 let skillSetSelect = document.querySelector("#skillSetSelect");
 skillSetSelect.addEventListener("change", onSkillSetChange);
 
+let showMedianInput = document.querySelector("#showMedianInput");
+showMedianInput.addEventListener("change", onShowMedianChange);
+
+let showAverageInput = document.querySelector("#showAverageInput");
+showAverageInput.addEventListener("change", onShowAverageChange);
+
+let showMedian = showMedianInput.checked;
+let showAverage = showAverageInput.checked;
+
 let highlightedPlayerName = playerHighlightInput.value;
 let binSize = parseFloat(binSizeInput.value);
 let skill = skillSetSelect.value;
 let allRows = [];
+
+function onShowMedianChange(e) {
+	showMedian = showMedianInput.checked;
+	processData();
+}
+
+function onShowAverageChange(e) {
+	showAverage = showAverageInput.checked;
+	processData();
+}
 
 function onPlayerHighlightChange(e) {
 	highlightedPlayerName = e.target.value;
@@ -189,6 +208,8 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 				text: "Player Count",
 			},
 			range: [0, tallestBinHeight + tallestBinHeight * 0.15],
+			gridcolor: "rgba(255,255,255,.1)",
+			gridwidth: 3,
 		},
 		paper_bgcolor: "rgba(0,0,0,0)",
 		plot_bgcolor: "rgba(0,0,0,0)",
@@ -198,6 +219,51 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 	};
 
 	let annotations = [];
+
+	if (showMedian) {
+		const middle = Math.floor(scores.length / 2);
+		let medianVal =
+			scores.length % 2 === 0 ? (scores[middle - 1] + scores[middle]) / 2 : scores[middle];
+
+		annotations.push({
+			text: `median: ${medianVal.toFixed(2)}`,
+			align: "left",
+			bgcolor: "rgb(20,20,20)",
+			x: medianVal,
+			y: 0,
+			ax: medianVal,
+			ay: tallestBinHeight + tallestBinHeight * 0.05,
+			axref: "x",
+			ayref: "y",
+			arrowcolor: "rgb(200, 200, 200)",
+			font: { size: 12 },
+			borderwidth: 1,
+			arrowsize: 1,
+			arrowwidth: 1,
+		});
+	}
+
+	if (showAverage) {
+		const sum = scores.reduce((a, b) => a + b, 0);
+		const avg = sum / scores.length || 0;
+
+		annotations.push({
+			text: `avg: ${avg.toFixed(2)}`,
+			align: "left",
+			bgcolor: "rgb(20,20,20)",
+			x: avg,
+			y: 0,
+			ax: avg,
+			ay: tallestBinHeight + tallestBinHeight * 0.0,
+			axref: "x",
+			ayref: "y",
+			arrowcolor: "rgb(200, 200, 200)",
+			font: { size: 12 },
+			borderwidth: 1,
+			arrowsize: 1,
+			arrowwidth: 1,
+		});
+	}
 
 	if (playerToHighlight) {
 		let displayText = `${playerToHighlight.name} - ${
@@ -212,8 +278,8 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 			bgcolor: "rgb(20,20,20)",
 			x: playerToHighlight.score,
 			y: playerToHighlight.barHeight,
-			ax: playerToHighlight.score + binSize,
-			ay: playerToHighlight.barHeight + 100 * binSize,
+			ax: playerToHighlight.score + 20 * binSize,
+			ay: playerToHighlight.barHeight + 0 * binSize,
 			axref: "x",
 			ayref: "y",
 			arrowcolor: "rgb(200, 200, 200)",

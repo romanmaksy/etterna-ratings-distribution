@@ -20,22 +20,31 @@
       </div>
     </div>
     <div id="graphControls">
-      <div id="highlightedPlayerControl" class="graphControl">player<input id="playerHighlightInput" type="text" placeholder="start typing..."></div>
+      <div id="highlightedPlayerControl" class="graphControl">
+        player<input id="playerHighlightInput" type="text" placeholder="start typing...">
+      </div>
       <div id="skillSetControl" class="graphControl">
         skillset
-      <select id="skillSetSelect">
-        <option value="player_rating">Overall</option>
-        <option value="Stream">Stream</option>
-        <option value="Jumpstream">Jumpstream</option>
-        <option value="Handstream">Handstream</option>
-        <option value="Stamina">Stamina</option>
-        <option value="JackSpeed">Jacks</option>
-        <option value="Chordjack">Chordjacks</option>
-        <option value="Technical">Technical</option>
-      </select>
+        <select id="skillSetSelect">
+          <option value="player_rating">Overall</option>
+          <option value="Stream">Stream</option>
+          <option value="Jumpstream">Jumpstream</option>
+          <option value="Handstream">Handstream</option>
+          <option value="Stamina">Stamina</option>
+          <option value="JackSpeed">Jacks</option>
+          <option value="Chordjack">Chordjacks</option>
+          <option value="Technical">Technical</option>
+        </select>
       </div>
-      <div id="binSizeControl" class="graphControl">bin size<input id="binSizeInput" type="number" min=".01" max="40"
-          step="0.1" value=".5" /></div>
+      <div id="binSizeControl" class="graphControl">
+        bin size<input id="binSizeInput" type="number" min=".01" max="40" step="0.1" value=".5" />
+      </div>
+      <div id="showMedianControl" class="graphControl">
+        median <input type="checkbox" id="showMedianInput" checked="true">
+      </div>
+      <div id="showAverageControl" class="graphControl">
+        average <input type="checkbox" id="showAverageInput">
+      </div>
     </div>
   </div>
 </body>
