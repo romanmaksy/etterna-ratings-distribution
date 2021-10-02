@@ -6,6 +6,7 @@ body {
 	background-color: rgb(34, 34, 34);
 	color: white;
 	margin: 20px;
+	overflow: hidden;
 }
 
 #chartCard {
@@ -17,7 +18,7 @@ body {
 
 #content {
 	margin: auto;
-	width: 60%;
+	width: 90%;
 	text-align: center;
 	padding: 10px;
 }
@@ -30,9 +31,29 @@ body {
 
 .graphControl {
 	margin: 20px;
+	flex-grow: 1;
+	flex-basis: 0;
 }
 
 input {
+	margin-left: 10px;
 	width: 110.67px;
 	height: 24.67px;
+}
+
+.autocomplete-items div {
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+	color: #000;
+}
+.autocomplete-items div:hover {
+	/*when hovering an item:*/
+	background-color: #e9e9e9;
+}
+.autocomplete-active {
+	/*when navigating through the items using the arrow keys:*/
+	background-color: DodgerBlue !important;
+	color: #ffffff;
 }

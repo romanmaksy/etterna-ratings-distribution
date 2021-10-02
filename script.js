@@ -36,6 +36,12 @@ async function readCSV() {
 	// wrap load in timeout to make it async
 	Plotly.d3.csv("./etternaRatings.csv", function (data) {
 		allRows = data;
+		if (!autocompleteInitialized) {
+			autocomplete(
+				document.getElementById("playerHighlightInput"),
+				allRows.map((row) => row["formatted username"])
+			);
+		}
 		processData();
 	});
 }
@@ -43,11 +49,16 @@ async function readCSV() {
 function processData() {
 	SlickLoader.enable();
 
-	let currentBin = binSize;
 	let scoresPerBin = [];
-	let binScoreCount = 0;
 	let scores = [];
 	let binPercentiles = [];
+	let binSizes = [];
+
+	let binInfos = [];
+
+	// transient vars
+	let currentBin = binSize;
+	let binScoreCount = 0;
 
 	// sort relevant scores ascending
 	let allScores = allRows.map((row) => parseFloat(row[skill]));
@@ -63,37 +74,50 @@ function processData() {
 
 		// add percentile text for each bin, including empty bins
 		while (parseFloat(score.toFixed(2)) > parseFloat(currentBin.toFixed(2))) {
-			binPercentiles.push(parseFloat(percentiles[i - 1]));
+			binInfos.push({
+				size: currentBin,
+				percentile: parseFloat(percentiles[i - 1]),
+				scoreCount: binScoreCount,
+			});
+
 			currentBin += binSize;
-			scoresPerBin.push(binScoreCount);
 			binScoreCount = 0;
 		}
 	}
 
 	// add last element
-	binPercentiles.push(100);
-	scoresPerBin.push(binScoreCount);
+	binInfos.push({
+		size: currentBin,
+		percentile: parseFloat(percentiles[percentiles.length - 1]),
+		scoreCount: binScoreCount,
+	});
 
 	// attempt to get info for highlighted player
 	let playerToHighlight = null;
-	if ((playerRow = allRows.find((row) => row["formatted username"] == highlightedPlayerName))) {
-		let score = parseFloat(playerRow[skill]);
-		let binIndex = Math.floor(score / binSize);
+	let highlightedPlayerIndex = allRows.findIndex(
+		(row) => row["formatted username"] == highlightedPlayerName
+	);
+
+	if (highlightedPlayerIndex >= 0) {
+		let score = parseFloat(allRows[highlightedPlayerIndex][skill]);
+		let binIndex = 0;
+
+		for (binIndex; binIndex < binInfos.length; binIndex++) {
+			if (binInfos[binIndex].size > score) {
+				break;
+			}
+		}
+
 		playerToHighlight = {
 			name: highlightedPlayerName,
 			score: score,
 			binIndex: binIndex,
-			barHeight: scoresPerBin[binIndex],
+			barHeight: binInfos[binIndex].scoreCount,
+			percentile: percentiles[highlightedPlayerIndex],
 		};
 	}
 
-	makePlotly(
-		scores,
-		binPercentiles,
-		playerToHighlight,
-		Math.max(...scores),
-		Math.max(...scoresPerBin)
-	);
+	makePlotly(scores, binInfos, playerToHighlight, Math.max(...scores));
 }
 
 // Returns the percentile of the given value in a sorted numeric array.
@@ -112,10 +136,12 @@ function percentRank(arr, v) {
 	return 1;
 }
 
-function makePlotly(scores, binPercentiles, playerToHighlight, highestScore, highestBin) {
+function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
+	let tallestBinHeight = Math.max(...binInfos.map((binInfo) => binInfo.scoreCount));
+
 	let colors = [];
 
-	for (var i = 0; i < binPercentiles.length; i++) {
+	for (var i = 0; i < binInfos.length; i++) {
 		if (playerToHighlight && i == playerToHighlight.binIndex) colors.push("rgba(100, 100, 230, 1)");
 		else colors.push("rgba(100, 100, 200, .95)");
 	}
@@ -124,7 +150,7 @@ function makePlotly(scores, binPercentiles, playerToHighlight, highestScore, hig
 	var trace = {
 		x: scores,
 		type: "histogram",
-		text: binPercentiles,
+		text: binInfos.map((binInfo) => binInfo.percentile),
 		xbins: {
 			start: 0,
 			size: binSize,
@@ -162,7 +188,7 @@ function makePlotly(scores, binPercentiles, playerToHighlight, highestScore, hig
 			title: {
 				text: "Player Count",
 			},
-			range: [0, highestBin + highestBin * 0.15],
+			range: [0, tallestBinHeight + tallestBinHeight * 0.15],
 		},
 		paper_bgcolor: "rgba(0,0,0,0)",
 		plot_bgcolor: "rgba(0,0,0,0)",
@@ -171,28 +197,34 @@ function makePlotly(scores, binPercentiles, playerToHighlight, highestScore, hig
 		},
 	};
 
+	let annotations = [];
+
 	if (playerToHighlight) {
-		layout.annotations = [
-			{
-				text: `user: ${playerToHighlight.name}<br>${
-					skillSetSelect[skillSetSelect.selectedIndex].text
-				} rating: ${playerToHighlight.score.toFixed(2)}`,
-				align: "left",
-				bgcolor: "rgb(20,20,20)",
-				x: playerToHighlight.score,
-				y: playerToHighlight.barHeight,
-				ax: playerToHighlight.score + binSize * 4,
-				ay: playerToHighlight.barHeight + 100 * binSize,
-				axref: "x",
-				ayref: "y",
-				arrowcolor: "rgb(200, 200, 200)",
-				font: { size: 12 },
-				borderwidth: 1,
-				arrowsize: 1,
-				arrowwidth: 1,
-			},
-		];
+		let displayText = `${playerToHighlight.name} - ${
+			skillSetSelect[skillSetSelect.selectedIndex].text
+		} rating: ${playerToHighlight.score.toFixed(
+			2
+		)}<br>percentile: ${playerToHighlight.percentile.toFixed(2)}%`;
+
+		annotations.push({
+			text: displayText,
+			align: "left",
+			bgcolor: "rgb(20,20,20)",
+			x: playerToHighlight.score,
+			y: playerToHighlight.barHeight,
+			ax: playerToHighlight.score + binSize,
+			ay: playerToHighlight.barHeight + 100 * binSize,
+			axref: "x",
+			ayref: "y",
+			arrowcolor: "rgb(200, 200, 200)",
+			font: { size: 12 },
+			borderwidth: 1,
+			arrowsize: 1,
+			arrowwidth: 1,
+		});
 	}
+
+	layout.annotations = annotations;
 
 	Plotly.newPlot("plotlyChart", data, layout, { responsive: true });
 	SlickLoader.disable();
