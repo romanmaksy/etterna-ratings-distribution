@@ -3,14 +3,14 @@
 } */
 
 body {
-	background-color: rgb(34, 34, 34);
+	background-color: #4d072c;
 	color: white;
 	margin: 20px;
 	overflow: hidden;
 }
 
 #chartCard {
-	background-color: rgb(51, 51, 51);
+	background-color: #0f0e0e;
 	border-radius: 20px;
 	padding: 20px;
 	margin-top: 40px;

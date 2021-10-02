@@ -46,8 +46,42 @@ function onSkillSetChange(e) {
 	skill = e.target.value;
 	processData();
 }
-
 // control binding end
+
+// colorMapping = {
+// 	player_rating: {
+// 		normal: "#7D6B91",
+// 		highlight: "#7F916B",
+// 	},
+// 	Stream: {
+// 		normal: "#7D6B91",
+// 		highlight: "#7F916B",
+// 	},
+// 	Jumpstream: {
+// 		normal: "#8481db",
+// 		highlight: "#D8DB81",
+// 	},
+// 	Handstream: {
+// 		normal: "#995fa3",
+// 		highlight: "#69A35F",
+// 	},
+// 	Stamina: {
+// 		normal: "#f2b5fa",
+// 		highlight: "#BDFAB5",
+// 	},
+// 	JackSpeed: {
+// 		normal: "#6c969d",
+// 		highlight: "#9D736C",
+// 	},
+// 	Chordjack: {
+// 		normal: "#a5f8d3",
+// 		highlight: "#F8A5CA",
+// 	},
+// 	Technical: {
+// 		normal: "#b0cec2",
+// 		highlight: "#CEB0BC",
+// 	},
+// };
 
 async function readCSV() {
 	SlickLoader.enable();
@@ -157,12 +191,9 @@ function percentRank(arr, v) {
 
 function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 	let tallestBinHeight = Math.max(...binInfos.map((binInfo) => binInfo.scoreCount));
-
 	let colors = [];
-
 	for (var i = 0; i < binInfos.length; i++) {
-		if (playerToHighlight && i == playerToHighlight.binIndex) colors.push("rgba(100, 100, 230, 1)");
-		else colors.push("rgba(100, 100, 200, .95)");
+		colors.push(playerToHighlight && i == playerToHighlight.binIndex ? "#7F916B" : "#7D6B91");
 	}
 
 	var plotDiv = document.getElementById("plot");
@@ -220,15 +251,15 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 
 	let annotations = [];
 
-	if (showMedian) {
-		const middle = Math.floor(scores.length / 2);
-		let medianVal =
-			scores.length % 2 === 0 ? (scores[middle - 1] + scores[middle]) / 2 : scores[middle];
+	const middle = Math.floor(scores.length / 2);
+	let medianVal =
+		scores.length % 2 === 0 ? (scores[middle - 1] + scores[middle]) / 2 : scores[middle];
 
+	if (showMedian) {
 		annotations.push({
 			text: `median: ${medianVal.toFixed(2)}`,
 			align: "left",
-			bgcolor: "rgb(20,20,20)",
+			bgcolor: "rgba(0,0,0,0)",
 			x: medianVal,
 			y: 0,
 			ax: medianVal,
@@ -250,7 +281,7 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 		annotations.push({
 			text: `avg: ${avg.toFixed(2)}`,
 			align: "left",
-			bgcolor: "rgb(20,20,20)",
+			bgcolor: "rgba(0,0,0,0)",
 			x: avg,
 			y: 0,
 			ax: avg,
@@ -275,11 +306,11 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 		annotations.push({
 			text: displayText,
 			align: "left",
-			bgcolor: "rgb(20,20,20)",
+			bgcolor: "rgba(0,0,0,0)",
 			x: playerToHighlight.score,
 			y: playerToHighlight.barHeight,
-			ax: playerToHighlight.score + 20 * binSize,
-			ay: playerToHighlight.barHeight + 0 * binSize,
+			ax: playerToHighlight.score + binSize + 0.1 * binSize * binInfos.length,
+			ay: playerToHighlight.barHeight + 50 * binSize,
 			axref: "x",
 			ayref: "y",
 			arrowcolor: "rgb(200, 200, 200)",
