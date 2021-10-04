@@ -1,6 +1,7 @@
 // control binding - TODO: make some generic binder function to avoid duplicate boilerplate
+
 let playerHighlightInput = document.querySelector("#playerHighlightInput");
-playerHighlightInput.addEventListener("change", onPlayerHighlightChange);
+//playerHighlightInput.addEventListener("change", onPlayerHighlightChange);
 
 let binSizeInput = document.querySelector("#binSizeInput");
 binSizeInput.addEventListener("change", onBinSizeChange);
@@ -32,8 +33,9 @@ function onShowAverageChange(e) {
 	processData();
 }
 
-function onPlayerHighlightChange(e) {
-	highlightedPlayerName = e.target.value;
+// called manually by autocomplete.js since normal event sometimes fires too early and get half a string??
+function onPlayerHighlightChange(player) {
+	highlightedPlayerName = player;
 	processData();
 }
 
@@ -100,7 +102,7 @@ async function readCSV() {
 	});
 }
 
-function processData() {
+async function processData() {
 	SlickLoader.enable();
 
 	let scoresPerBin = [];
@@ -324,8 +326,9 @@ function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
 
 	layout.annotations = annotations;
 
-	Plotly.newPlot("plotlyChart", data, layout, { responsive: true });
-	SlickLoader.disable();
+	Plotly.newPlot("plotlyChart", data, layout, { responsive: true }).then((result) => {
+		SlickLoader.disable();
+	});
 }
 
 readCSV();
