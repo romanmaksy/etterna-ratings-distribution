@@ -24,7 +24,7 @@
     </div>
     <div id="graphControls">
       <div id="highlightedPlayerControl" class="graphControl">
-        player<input id="playerHighlightInput" type="text" placeholder="start typing...">
+        username<br><input id="playerHighlightInput" type="text" placeholder="start typing...">
       </div>
       <div id="skillSetControl" class="graphControl">
         skillset
@@ -39,14 +39,20 @@
           <option value="Technical">Technical</option>
         </select>
       </div>
+      <div id="minScoreControl" class="graphControl">
+        min score<br><input id="minScoreInput" type="number" min="0" max="40" step="0.01" value="0" />
+      </div>
+      <div id="maxScoreControl" class="graphControl">
+        max score<br><input id="maxScoreInput" type="number" min="0" max="40" step="0.01" value="40" />
+      </div>
       <div id="binSizeControl" class="graphControl">
-        bin size<input id="binSizeInput" type="number" min=".01" max="40" step="0.1" value=".5" />
+        bin size<br><input id="binSizeInput" type="number" min = "0.01" value=".5" />
       </div>
       <div id="showMedianControl" class="graphControl">
-        median <input type="checkbox" id="showMedianInput" checked="true">
+        median<br><input type="checkbox" id="showMedianInput" checked="true">
       </div>
       <div id="showAverageControl" class="graphControl">
-        average <input type="checkbox" id="showAverageInput">
+        average<br><input type="checkbox" id="showAverageInput">
       </div>
     </div>
   </div>

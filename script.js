@@ -1,90 +1,38 @@
-// control binding - TODO: make some generic binder function to avoid duplicate boilerplate
+// control binding
 
-let playerHighlightInput = document.querySelector("#playerHighlightInput");
-//playerHighlightInput.addEventListener("change", onPlayerHighlightChange);
+let minScoreInput = document.querySelector("#minScoreInput");
+minScoreInput.addEventListener("change", onInputsChanged);
+
+let maxScoreInput = document.querySelector("#maxScoreInput");
+maxScoreInput.addEventListener("change", onInputsChanged);
 
 let binSizeInput = document.querySelector("#binSizeInput");
-binSizeInput.addEventListener("change", onBinSizeChange);
+binSizeInput.addEventListener("change", onInputsChanged);
 
 let skillSetSelect = document.querySelector("#skillSetSelect");
-skillSetSelect.addEventListener("change", onSkillSetChange);
+skillSetSelect.addEventListener("change", onInputsChanged);
 
 let showMedianInput = document.querySelector("#showMedianInput");
-showMedianInput.addEventListener("change", onShowMedianChange);
+showMedianInput.addEventListener("change", onInputsChanged);
 
 let showAverageInput = document.querySelector("#showAverageInput");
-showAverageInput.addEventListener("change", onShowAverageChange);
+showAverageInput.addEventListener("change", onInputsChanged);
+
+let playerHighlightInput = document.querySelector("#playerHighlightInput");
+playerHighlightInput.addEventListener("change", onInputsChanged);
 
 let showMedian = showMedianInput.checked;
 let showAverage = showAverageInput.checked;
-
 let highlightedPlayerName = playerHighlightInput.value;
 let binSize = parseFloat(binSizeInput.value);
 let skill = skillSetSelect.value;
+let minScore = minScoreInput.value;
+let maxScore = maxScoreInput.value;
 let allRows = [];
 
-function onShowMedianChange(e) {
-	showMedian = showMedianInput.checked;
-	processData();
+function onInputsChanged(e) {
+	recalculateGraph();
 }
-
-function onShowAverageChange(e) {
-	showAverage = showAverageInput.checked;
-	processData();
-}
-
-// called manually by autocomplete.js since normal event sometimes fires too early and get half a string??
-function onPlayerHighlightChange(player) {
-	highlightedPlayerName = player;
-	processData();
-}
-
-function onBinSizeChange(e) {
-	binSize = Math.max(0.01, parseFloat(e.target.value));
-	binSizeInput.value = binSize;
-	processData();
-}
-
-function onSkillSetChange(e) {
-	skill = e.target.value;
-	processData();
-}
-// control binding end
-
-// colorMapping = {
-// 	player_rating: {
-// 		normal: "#7D6B91",
-// 		highlight: "#7F916B",
-// 	},
-// 	Stream: {
-// 		normal: "#7D6B91",
-// 		highlight: "#7F916B",
-// 	},
-// 	Jumpstream: {
-// 		normal: "#8481db",
-// 		highlight: "#D8DB81",
-// 	},
-// 	Handstream: {
-// 		normal: "#995fa3",
-// 		highlight: "#69A35F",
-// 	},
-// 	Stamina: {
-// 		normal: "#f2b5fa",
-// 		highlight: "#BDFAB5",
-// 	},
-// 	JackSpeed: {
-// 		normal: "#6c969d",
-// 		highlight: "#9D736C",
-// 	},
-// 	Chordjack: {
-// 		normal: "#a5f8d3",
-// 		highlight: "#F8A5CA",
-// 	},
-// 	Technical: {
-// 		normal: "#b0cec2",
-// 		highlight: "#CEB0BC",
-// 	},
-// };
 
 async function readCSV() {
 	SlickLoader.enable();
@@ -98,12 +46,24 @@ async function readCSV() {
 				allRows.map((row) => row["formatted username"])
 			);
 		}
-		processData();
+		recalculateGraph();
 	});
 }
 
-async function processData() {
+async function recalculateGraph() {
 	SlickLoader.enable();
+
+	// grab latest data
+	showMedian = showMedianInput.checked;
+	showAverage = showAverageInput.checked;
+	highlightedPlayerName = playerHighlightInput.value;
+	binSize = Math.max(0.01, parseFloat(binSizeInput.value || 0.5));
+	binSizeInput.value = binSize;
+	skill = skillSetSelect.value;
+	minScore = Math.max(0, parseFloat(minScoreInput.value || 0));
+	minScoreInput.value = minScore;
+	maxScore = Math.max(minScore + 0.01, parseFloat(maxScoreInput.value || 40));
+	maxScoreInput.value = maxScore;
 
 	let scoresPerBin = [];
 	let binPercentiles = [];
@@ -112,13 +72,22 @@ async function processData() {
 	let binInfos = [];
 
 	// transient vars
-	let currentBin = binSize;
+	let currentBin = minScore + binSize;
 	let binScoreCount = 0;
 
 	// get relevant scores from csv data
-	let scoreData = allRows.map((row) => {
-		return { name: row["formatted username"], score: parseFloat(row[skill]) };
+	let scoreData = [];
+	allRows.forEach((row) => {
+		let score = parseFloat(row[skill]);
+		if (score >= minScore && score <= maxScore) {
+			scoreData.push({ name: row["formatted username"], score: score });
+		}
 	});
+
+	if (scoreData.length == 0) {
+		SlickLoader.disable();
+		return;
+	}
 
 	// sort ascending
 	scoreData = scoreData.sort(function (a, b) {
@@ -134,14 +103,24 @@ async function processData() {
 	for (var i = 0; i < scoreData.length; i++) {
 		binScoreCount++;
 
+		console.log(
+			`${Math.round(parseFloat(scoreData[i].score) * 1000000)} > ${Math.round(
+				parseFloat(currentBin) * 1000000
+			)} ? ${
+				Math.round(parseFloat(scoreData[i].score) * 1000000) >
+				Math.round(parseFloat(currentBin) * 1000000)
+			}
+			`
+		);
 		// add percentile text for each bin, including empty bins
 		while (
-			Math.round(parseFloat(scoreData[i].score) * 100000) >
-			Math.round(parseFloat(currentBin) * 100000)
+			Math.round(parseFloat(scoreData[i].score) * 1000000) >=
+			Math.round(parseFloat(currentBin) * 1000000)
 		) {
+			console.log(`added bin at score ${scoreData[i].score}`);
 			binInfos.push({
 				size: currentBin,
-				percentile: parseFloat(scoreData[i - 1].percentile),
+				percentile: scoreData[Math.max(0, i - 1)].percentile,
 				scoreCount: binScoreCount,
 			});
 
@@ -228,7 +207,7 @@ function makePlotly(scoreData, binInfos, playerToHighlight) {
 		marker: {
 			color: colors,
 			line: {
-				width: binSize > 0.1 ? 1 : 0,
+				width: maxScore / binSize > 0.1 ? 1 : 0,
 			},
 		},
 	};
@@ -250,7 +229,7 @@ function makePlotly(scoreData, binInfos, playerToHighlight) {
 				text: `${skillSetSelect[skillSetSelect.selectedIndex].text} rating`,
 			},
 			dtick: 5,
-			range: [0, highestScore + highestScore * 0.15],
+			range: [minScore, highestScore + highestScore * 0.15],
 		},
 		yaxis: {
 			title: {
