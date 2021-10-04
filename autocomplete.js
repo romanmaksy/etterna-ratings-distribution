@@ -22,6 +22,10 @@ function autocomplete(inp, arr) {
 		a.setAttribute("class", "autocomplete-items");
 		/*append the DIV element as a child of the autocomplete container:*/
 		this.parentNode.appendChild(a);
+
+		let addedElements = 0;
+		let maxElements = 3;
+
 		/*for each item in the array...*/
 		for (i = 0; i < arr.length; i++) {
 			/*check if the item starts with the same letters as the text field value:*/
@@ -42,7 +46,10 @@ function autocomplete(inp, arr) {
 					closeAllLists();
 				});
 				a.appendChild(b);
+				addedElements++;
 			}
+
+			if (addedElements >= maxElements) break;
 		}
 	});
 	/*execute a function presses a key on the keyboard:*/
