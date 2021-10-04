@@ -128,14 +128,17 @@ async function processData() {
 	let scores = scoreData.map((entry) => entry.score);
 
 	// calculate percentiles
-	scoreData.forEach((entry) => (entry.percentile = percentRank(scores, entry.score)));
+	scoreData.forEach((entry) => (entry.percentile = 100 * percentRank(scores, entry.score)));
 
 	// calculate bins
 	for (var i = 0; i < scoreData.length; i++) {
 		binScoreCount++;
 
 		// add percentile text for each bin, including empty bins
-		while (parseFloat(scoreData[i].score.toFixed(2)) > parseFloat(currentBin.toFixed(2))) {
+		while (
+			Math.round(parseFloat(scoreData[i].score) * 100000) >
+			Math.round(parseFloat(currentBin) * 100000)
+		) {
 			binInfos.push({
 				size: currentBin,
 				percentile: parseFloat(scoreData[i - 1].percentile),
