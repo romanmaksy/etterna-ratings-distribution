@@ -106,7 +106,6 @@ async function processData() {
 	SlickLoader.enable();
 
 	let scoresPerBin = [];
-	let scores = [];
 	let binPercentiles = [];
 	let binSizes = [];
 
@@ -116,23 +115,30 @@ async function processData() {
 	let currentBin = binSize;
 	let binScoreCount = 0;
 
-	// sort relevant scores ascending
-	let allScores = allRows.map((row) => parseFloat(row[skill]));
-	allScores.sort((a, b) => a - b);
+	// get relevant scores from csv data
+	let scoreData = allRows.map((row) => {
+		return { name: row["formatted username"], score: parseFloat(row[skill]) };
+	});
+
+	// sort ascending
+	scoreData = scoreData.sort(function (a, b) {
+		return a.score - b.score;
+	});
 
 	// calculate percentiles
-	let percentiles = allScores.map((score) => percentRank(allScores, score) * 100);
+	scoreData.forEach((entry, i) => {
+		entry.percentile = (100 * (i + 1)) / scoreData.length;
+	});
 
-	for (var i = 0; i < allScores.length; i++) {
-		let score = allScores[i];
-		scores.push(score);
+	// calculate bins
+	for (var i = 0; i < scoreData.length; i++) {
 		binScoreCount++;
 
 		// add percentile text for each bin, including empty bins
-		while (parseFloat(score.toFixed(2)) > parseFloat(currentBin.toFixed(2))) {
+		while (parseFloat(scoreData[i].score.toFixed(2)) > parseFloat(currentBin.toFixed(2))) {
 			binInfos.push({
 				size: currentBin,
-				percentile: parseFloat(percentiles[i - 1]),
+				percentile: parseFloat(scoreData[i - 1].percentile),
 				scoreCount: binScoreCount,
 			});
 
@@ -144,55 +150,38 @@ async function processData() {
 	// add last element
 	binInfos.push({
 		size: currentBin,
-		percentile: parseFloat(percentiles[percentiles.length - 1]),
+		percentile: parseFloat(scoreData[scoreData.length - 1].percentile),
 		scoreCount: binScoreCount,
 	});
 
 	// attempt to get info for highlighted player
 	let playerToHighlight = null;
-	let highlightedPlayerIndex = allRows.findIndex(
-		(row) => row["formatted username"] == highlightedPlayerName
-	);
+	let highlightedPlayerData = scoreData.find((score) => score.name == highlightedPlayerName);
 
-	if (highlightedPlayerIndex >= 0) {
-		let score = parseFloat(allRows[highlightedPlayerIndex][skill]);
+	if (highlightedPlayerData) {
 		let binIndex = 0;
 
 		for (binIndex; binIndex < binInfos.length; binIndex++) {
-			if (binInfos[binIndex].size > score) {
+			if (binInfos[binIndex].size > highlightedPlayerData.score) {
 				break;
 			}
 		}
 
 		playerToHighlight = {
-			name: highlightedPlayerName,
-			score: score,
+			name: highlightedPlayerData.name,
+			score: highlightedPlayerData.score,
 			binIndex: binIndex,
 			barHeight: binInfos[binIndex].scoreCount,
-			percentile: percentiles[highlightedPlayerIndex],
+			percentile: highlightedPlayerData.percentile,
 		};
 	}
 
-	makePlotly(scores, binInfos, playerToHighlight, Math.max(...scores));
+	makePlotly(scoreData, binInfos, playerToHighlight);
 }
 
-// Returns the percentile of the given value in a sorted numeric array.
-function percentRank(arr, v) {
-	if (typeof v !== "number") throw new TypeError("v must be a number");
-	for (var i = 0, l = arr.length; i < l; i++) {
-		if (v <= arr[i]) {
-			while (i < l && v === arr[i]) i++;
-			if (i === 0) return 0;
-			if (v !== arr[i - 1]) {
-				i += (v - arr[i - 1]) / (arr[i] - arr[i - 1]);
-			}
-			return i / l;
-		}
-	}
-	return 1;
-}
-
-function makePlotly(scores, binInfos, playerToHighlight, highestScore) {
+function makePlotly(scoreData, binInfos, playerToHighlight) {
+	let scores = scoreData.map((entry) => entry.score);
+	let highestScore = Math.max(...scores);
 	let tallestBinHeight = Math.max(...binInfos.map((binInfo) => binInfo.scoreCount));
 	let colors = [];
 	for (var i = 0; i < binInfos.length; i++) {
