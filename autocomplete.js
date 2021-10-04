@@ -41,7 +41,7 @@ function autocomplete(inp, arr) {
 				b.addEventListener("click", function (e) {
 					/*insert the value for the autocomplete text field:*/
 					inp.value = this.getElementsByTagName("input")[0].value;
-					onPlayerHighlightChange(this.getElementsByTagName("input")[0].value);
+					onPlayerHighlightChange(inp.value);
 					/*close the list of autocompleted values,
               (or any other open lists of autocompleted values:*/
 					closeAllLists();
@@ -76,6 +76,9 @@ function autocomplete(inp, arr) {
 			if (currentFocus > -1) {
 				/*and simulate a click on the "active" item:*/
 				if (x) x[currentFocus].click();
+			} else {
+				closeAllLists();
+				onPlayerHighlightChange(inp.value);
 			}
 		}
 	});
