@@ -2,7 +2,7 @@ name: update-leaderboard-data
 
 on:
   schedule:
-    - cron: "*/5 * * * *" # every 5th minute
+    - cron: "*/3 * * * *" # every 3 minutes
 
 jobs:
   build:
