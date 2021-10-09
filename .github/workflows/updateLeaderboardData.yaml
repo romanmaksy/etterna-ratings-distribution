@@ -2,12 +2,12 @@ name: update-leaderboard-data
 
 on:
   schedule:
-    - cron: "*/5 * * * *" # every 5 minutes
+    - cron: "0 0 * * *" # run daily
 
   workflow_dispatch:
 
 jobs:
-  build:
+  update_leaderboard_csv_files:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
