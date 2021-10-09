@@ -1,0 +1,63 @@
+.modebar {
+	display: none !important;
+}
+
+body {
+	background-color: #031926;
+	color: white;
+	margin: 20px;
+	overflow: hidden;
+	font-family: "Poppins", sans-serif;
+}
+
+h1 {
+	color: #fffffc;
+}
+
+#chartCard {
+	background-color: #0f0e0e;
+	border-radius: 20px;
+	padding: 20px;
+	margin-top: 40px;
+}
+
+#content {
+	margin: auto;
+	width: 90%;
+	text-align: center;
+	padding: 10px;
+}
+
+#graphControls {
+	display: flex;
+	justify-content: center;
+	align-content: center;
+}
+
+.graphControl {
+	margin: 20px;
+	flex-basis: 0;
+}
+
+input {
+	margin-left: 10px;
+	width: 110.67px;
+	height: 24.67px;
+}
+
+.autocomplete-items div {
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+	color: #000;
+}
+.autocomplete-items div:hover {
+	/*when hovering an item:*/
+	background-color: #e9e9e9;
+}
+.autocomplete-active {
+	/*when navigating through the items using the arrow keys:*/
+	background-color: DodgerBlue !important;
+	color: #ffffff;
+}

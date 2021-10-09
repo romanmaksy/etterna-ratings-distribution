@@ -1,12 +1,14 @@
 <head>
   <title>Etterna Rating Distribution Viewer</title>
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 	<script src="https://cdn.plot.ly/plotly-latest.min.js" defer></script>
-	<script src="./script.js" defer></script>
-  <script src="./autocomplete.js" defer></script>
+	<script src="./js/script.js" defer></script>
+  <script src="./js/autocomplete.js" defer></script>
+  <script src="./js/inputBinding.js" defer></script>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"/>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
   <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="romanmaksy" data-description="Support me on Buy me a coffee!" data-message="Think this is cool? Show your appreciation by buying me a coffee!" data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
-  <link rel="stylesheet" href="./style.css"/>
+  <link rel="stylesheet" href="./css/style.css"/>
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/slick-loader@1.1.20/slick-loader.min.css">
   <script src="https://unpkg.com/slick-loader@1.1.20/slick-loader.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +19,7 @@
 <body>
   <div id="content">
     <h1>Etterna Rating Distribution Viewer</h1>
+    <p id="lastUpdated"></p>
     <div id="chartCard">
       <div id="plotlyChart">
         <!-- Plotly chart will be drawn inside this DIV -->
@@ -29,13 +32,13 @@
       <div id="skillSetControl" class="graphControl">
         skillset
         <select id="skillSetSelect">
-          <option value="player_rating">Overall</option>
+          <option value="Overall">Overall</option>
           <option value="Stream">Stream</option>
           <option value="Jumpstream">Jumpstream</option>
           <option value="Handstream">Handstream</option>
           <option value="Stamina">Stamina</option>
-          <option value="JackSpeed">Jacks</option>
-          <option value="Chordjack">Chordjacks</option>
+          <option value="Jacks">Jacks</option>
+          <option value="Chordjacks">Chordjacks</option>
           <option value="Technical">Technical</option>
         </select>
       </div>
