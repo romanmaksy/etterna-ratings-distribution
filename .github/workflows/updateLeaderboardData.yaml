@@ -2,7 +2,7 @@ name: update-leaderboard-data
 
 on:
   schedule:
-    - cron: "*/3 * * * *" # every 3 minutes
+    - cron: "*/2 * * * *" # every 2 minutes
 
 jobs:
   build:
@@ -33,4 +33,4 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: test
+          branch: main
