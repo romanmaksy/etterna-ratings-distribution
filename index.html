@@ -5,8 +5,7 @@
   <script src="./js/script.js" defer></script>
   <script src="./js/autocomplete.js" defer></script>
   <script src="./js/inputBinding.js" defer></script>
-  <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="romanmaksy" data-description="Support me on Buy me a coffee!" data-message="Think this is cool? Show your appreciation by buying me a coffee!" data-color="#FFDD00" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
-  <link rel="stylesheet" href="./css/style.css"/>
+  <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/slick-loader@1.1.20/slick-loader.min.css">
   <script src="https://unpkg.com/slick-loader@1.1.20/slick-loader.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +14,12 @@
 </head>
 
 <body>
+  <div id="links">
+    <a href="https://github.com/romanmaksy/etterna-ratings-distribution" target="_blank"><img class="circleButton"
+        src="resources/github.png" /></a>
+    <a href="https://www.buymeacoffee.com/romanmaksy" target="_blank"><img class="circleButton"
+        src="resources/buyMeACoffeeImage.png" /></a>
+  </div>
   <div id="content">
     <h1>Etterna Rating Distribution Viewer</h1>
     <p id="lastUpdated"></p>
@@ -25,10 +30,13 @@
     </div>
     <div id="graphControls">
       <div id="highlightedPlayerControl" class="graphControl">
-        username<br><input id="playerHighlightInput" type="text" placeholder="start typing...">
+        <label>username</label>
+        <div id="autocompleteContainer">
+          <input id="playerHighlightInput" type="text" placeholder="start typing...">
+        </div>
       </div>
       <div id="skillSetControl" class="graphControl">
-        skillset<br>
+        <label>skillset</label>
         <select id="skillSetSelect">
           <option value="Overall">Overall</option>
           <option value="Stream">Stream</option>
@@ -41,19 +49,19 @@
         </select>
       </div>
       <div id="minScoreControl" class="graphControl">
-        min score<br><input id="minScoreInput" type="number" min="0" max="40" step="0.01" value="0" />
+        <label>min score</label><input id="minScoreInput" type="number" min="0" max="40" step="0.01" value="0" />
       </div>
       <div id="maxScoreControl" class="graphControl">
-        max score<br><input id="maxScoreInput" type="number" min="0" max="40" step="0.01" value="40" />
+        <label>max score</label><input id="maxScoreInput" type="number" min="0" max="40" step="0.01" value="40" />
       </div>
       <div id="binSizeControl" class="graphControl">
-        bin size<br><input id="binSizeInput" type="number" min = "0.01" value=".5" />
+        <label>bin size</label><input id="binSizeInput" type="number" min="0.01" value=".5" />
       </div>
       <div id="showMedianControl" class="graphControl">
-        median<br><input type="checkbox" id="showMedianInput" checked="true">
+        <label>median</label><input type="checkbox" id="showMedianInput" checked="true">
       </div>
       <div id="showAverageControl" class="graphControl">
-        average<br><input type="checkbox" id="showAverageInput">
+        <label>average</label><input type="checkbox" id="showAverageInput">
       </div>
     </div>
   </div>

@@ -1,3 +1,8 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
 .modebar {
 	display: none !important;
 }
@@ -6,47 +11,69 @@ body {
 	background-color: #031926;
 	color: white;
 	margin: 20px;
-	overflow: hidden;
 	font-family: "Poppins", sans-serif;
 }
 
 h1 {
 	color: #fffffc;
+	text-align: center;
+}
+
+#lastUpdated {
+	text-align: center;
 }
 
 #chartCard {
 	background-color: #0f0e0e;
 	border-radius: 20px;
-	padding: 20px;
-	margin-top: 40px;
+	padding: 10px;
+	margin: 20px;
 }
 
 #content {
 	margin: auto;
 	width: 90%;
-	text-align: center;
-	padding: 10px;
 }
 
 #graphControls {
-	display: flex;
-	justify-content: center;
-	align-content: center;
+	margin: 10px;
 }
 
 .graphControl {
 	margin: 20px;
-	flex-basis: 0;
+	display: flex;
 }
 
-input {
-	margin-left: 10px;
-	width: 110.67px;
-	height: 24.67px;
+label {
+	width: 100px;
+}
+
+input,
+select {
+	flex-grow: 1;
+}
+
+#autocompleteContainer {
+	position: relative;
+	display: flex;
+	flex-grow: 1;
+}
+
+input[type="checkbox"] {
+	flex-grow: 0;
+	transform: scale(1.5);
+	margin-top: 5px;
+}
+
+#playerHighlightInputautocomplete-list {
+	position: absolute;
+	top: 25px;
+	left: 0;
+	right: 0;
 }
 
 .autocomplete-items div {
-	padding: 10px;
+	padding: 5px;
 	cursor: pointer;
 	background-color: #fff;
 	border-bottom: 1px solid #d4d4d4;
@@ -60,4 +87,21 @@ input {
 	/*when navigating through the items using the arrow keys:*/
 	background-color: DodgerBlue !important;
 	color: #ffffff;
+}
+
+#bmc-wbtn {
+	top: 18px;
+}
+
+#links {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	display: flex;
+}
+
+.circleButton {
+	width: 48;
+	border-radius: 48px;
+	margin-left: 10px;
 }

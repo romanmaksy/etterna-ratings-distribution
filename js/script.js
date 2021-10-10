@@ -197,6 +197,7 @@ function MakeGraph(scoreData, binData, playerToHighlight) {
 		font: {
 			color: "white",
 		},
+		dragmode: false,
 	};
 
 	// add average and median annotations if required

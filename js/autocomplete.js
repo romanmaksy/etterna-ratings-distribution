@@ -1,4 +1,5 @@
 let autocompleteInitialized = false;
+const MAX_SUGGESTIONS = 4;
 
 function autocomplete(inp, arr) {
 	/*the autocomplete function takes two arguments,
@@ -24,7 +25,6 @@ function autocomplete(inp, arr) {
 		this.parentNode.appendChild(a);
 
 		let addedElements = 0;
-		let maxElements = 3;
 
 		/*for each item in the array...*/
 		for (i = 0; i < arr.length; i++) {
@@ -50,7 +50,7 @@ function autocomplete(inp, arr) {
 				addedElements++;
 			}
 
-			if (addedElements >= maxElements) break;
+			if (addedElements >= MAX_SUGGESTIONS) break;
 		}
 	});
 	/*execute a function presses a key on the keyboard:*/
