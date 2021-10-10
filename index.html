@@ -1,5 +1,5 @@
 <head>
-  <title>Etterna Rating Distribution Viewer</title>
+  <title>Etterna Rating Distribution</title>
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
   <script src="https://cdn.plot.ly/plotly-latest.min.js" defer></script>
   <script src="./js/script.js" defer></script>
@@ -11,17 +11,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
-  <div id="links">
-    <a href="https://github.com/romanmaksy/etterna-ratings-distribution" target="_blank"><img class="circleButton"
-        src="resources/github.png" /></a>
-    <a href="https://www.buymeacoffee.com/romanmaksy" target="_blank"><img class="circleButton"
-        src="resources/buyMeACoffeeImage.png" /></a>
-  </div>
   <div id="content">
-    <h1>Etterna Rating Distribution Viewer</h1>
+    <h1>Etterna Rating Distribution</h1>
     <p id="lastUpdated"></p>
     <div id="chartCard">
       <div id="plotlyChart">
@@ -57,12 +52,21 @@
       <div id="binSizeControl" class="graphControl">
         <label>bin size</label><input id="binSizeInput" type="number" min="0.01" value=".5" />
       </div>
-      <div id="showMedianControl" class="graphControl">
-        <label>median</label><input type="checkbox" id="showMedianInput" checked="true">
+      <div id="checkBoxControls " class="graphControl">
+        <label>show</label>
+        <div id="checkboxContainer">
+          <label>median</label><input type="checkbox" id="showMedianInput" checked="true">
+          <label>average</label><input type="checkbox" id="showAverageInput">
+        </div>
       </div>
-      <div id="showAverageControl" class="graphControl">
-        <label>average</label><input type="checkbox" id="showAverageInput">
+      <div id="links">
+        <a href="https://github.com/romanmaksy/etterna-ratings-distribution" target="_blank"><img class="circleButton"
+            src="resources/github.png" /></a>
+        <a href="https://www.buymeacoffee.com/romanmaksy" target="_blank"><img class="circleButton"
+            src="resources/buyMeACoffeeImage.png" /></a>
       </div>
     </div>
+
+  </div>
   </div>
 </body>

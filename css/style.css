@@ -10,13 +10,17 @@
 body {
 	background-color: #031926;
 	color: white;
-	margin: 20px;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-top: 5px;
+	margin-bottom: 10px;
 	font-family: "Poppins", sans-serif;
 }
 
 h1 {
 	color: #fffffc;
 	text-align: center;
+	font-size: 1.5em;
 }
 
 #lastUpdated {
@@ -25,14 +29,14 @@ h1 {
 
 #chartCard {
 	background-color: #0f0e0e;
-	border-radius: 20px;
+	border-radius: 10px;
 	padding: 10px;
-	margin: 20px;
+	margin: 1vmax;
+	margin-bottom: 10px;
 }
 
 #content {
 	margin: auto;
-	width: 90%;
 }
 
 #graphControls {
@@ -40,7 +44,9 @@ h1 {
 }
 
 .graphControl {
-	margin: 20px;
+	margin-left: 1vmax;
+	margin-right: 0.5vmax;
+	margin-bottom: 10px;
 	display: flex;
 }
 
@@ -54,6 +60,7 @@ select {
 	background-color: #0f0e0e;
 	color: whitesmoke;
 	border-color: #020e15;
+	border-radius: 5px;
 }
 
 #autocompleteContainer {
@@ -62,10 +69,13 @@ select {
 	flex-grow: 1;
 }
 
+#checkboxContainer {
+	flex-grow: 1;
+}
+
 input[type="checkbox"] {
-	flex-grow: 0;
-	transform: scale(1.5);
-	margin-top: 5px;
+	margin-left: 1vmax;
+	margin-right: 1vmax;
 }
 
 #playerHighlightInputautocomplete-list {
@@ -95,14 +105,12 @@ input[type="checkbox"] {
 }
 
 #links {
-	position: absolute;
-	top: 20px;
-	right: 20px;
+	justify-content: center;
 	display: flex;
 }
 
 .circleButton {
-	width: 48;
-	border-radius: 48px;
+	width: 32;
+	border-radius: 32px;
 	margin-left: 10px;
 }

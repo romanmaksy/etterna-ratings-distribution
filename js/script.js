@@ -41,7 +41,7 @@ async function readCSVFiles() {
 	csvLoadingPromises.push(
 		fetch(`./resources/OverallRankings.csv`).then((r) => {
 			document.getElementById("lastUpdated").innerHTML =
-				"Data last updated on " + r.headers.get("Last-Modified");
+				"last data fetched on " + r.headers.get("Last-Modified").slice(0, -13);
 		})
 	);
 
@@ -166,13 +166,15 @@ function MakeGraph(scoreData, binData, playerToHighlight) {
 		},
 	];
 
+	let isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
+
 	// set up and style everything outside of the bars themselves
 	var layout = {
 		autosize: true,
-		height: 600,
+		height: isMobile ? 300 : 600,
 		margin: {
 			l: 50,
-			r: 50,
+			r: isMobile ? 0 : 50,
 			b: 50,
 			t: 0,
 			pad: 0,
@@ -278,9 +280,11 @@ function MakeGraph(scoreData, binData, playerToHighlight) {
 	layout.annotations = annotations;
 
 	// pass all data to plotly to render
-	Plotly.newPlot("plotlyChart", data, layout, { responsive: true }).then((result) => {
-		SlickLoader.disable();
-	});
+	Plotly.newPlot("plotlyChart", data, layout, { responsive: true, staticPlot: isMobile }).then(
+		(result) => {
+			SlickLoader.disable();
+		}
+	);
 }
 
 readCSVFiles();
