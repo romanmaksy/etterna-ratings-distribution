@@ -24,41 +24,46 @@
       </div>
     </div>
     <div id="graphControls">
-      <div id="highlightedPlayerControl" class="graphControl">
-        <label>username</label>
-        <div id="autocompleteContainer">
-          <input id="playerHighlightInput" type="text" placeholder="start typing...">
+      <div class="row">
+        <div id="highlightedPlayerControl" class="graphControl col">
+          <label>username</label>
+          <div id="autocompleteContainer">
+            <input id="playerHighlightInput" type="text" placeholder="start typing...">
+          </div>
+        </div>
+        <div id="skillSetControl" class="graphControl col">
+          <label>skillset</label>
+          <select id="skillSetSelect">
+            <option value="Overall">Overall</option>
+            <option value="Stream">Stream</option>
+            <option value="Jumpstream">Jumpstream</option>
+            <option value="Handstream">Handstream</option>
+            <option value="Stamina">Stamina</option>
+            <option value="Jacks">Jacks</option>
+            <option value="Chordjacks">Chordjacks</option>
+            <option value="Technical">Technical</option>
+          </select>
         </div>
       </div>
-      <div id="skillSetControl" class="graphControl">
-        <label>skillset</label>
-        <select id="skillSetSelect">
-          <option value="Overall">Overall</option>
-          <option value="Stream">Stream</option>
-          <option value="Jumpstream">Jumpstream</option>
-          <option value="Handstream">Handstream</option>
-          <option value="Stamina">Stamina</option>
-          <option value="Jacks">Jacks</option>
-          <option value="Chordjacks">Chordjacks</option>
-          <option value="Technical">Technical</option>
-        </select>
-      </div>
-      <div id="minScoreControl" class="graphControl">
-        <label>min score</label><input id="minScoreInput" type="number" min="0" max="40" step="0.01" value="0" />
-      </div>
-      <div id="maxScoreControl" class="graphControl">
-        <label>max score</label><input id="maxScoreInput" type="number" min="0" max="40" step="0.01" value="40" />
-      </div>
-      <div id="binSizeControl" class="graphControl">
-        <label>bin size</label><input id="binSizeInput" type="number" min="0.01" value=".5" />
-      </div>
-      <div id="checkBoxControls " class="graphControl">
-        <label>show</label>
-        <div id="checkboxContainer">
-          <label>median</label><input type="checkbox" id="showMedianInput" checked="true">
-          <label>average</label><input type="checkbox" id="showAverageInput">
+      <div class="row">
+        <div id="minScoreControl" class="graphControl col">
+          <label>min score</label><input id="minScoreInput" type="number" min="0" max="40" step="0.01" value="0" />
+        </div>
+        <div id="maxScoreControl" class="graphControl col">
+          <label>max score</label><input id="maxScoreInput" type="number" min="0" max="40" step="0.01" value="40" />
         </div>
       </div>
+      <div class="row">
+        <div id="binSizeControl" class="graphControl col">
+          <label>bin size</label><input id="binSizeInput" type="number" min="0.01" value=".5" />
+        </div>
+        <div id="checkBoxControls " class="graphControl col">
+          <label>show</label>
+          <p>median</p><input type="checkbox" id="showMedianInput" checked="true">
+          <p>average</p><input type="checkbox" id="showAverageInput">
+        </div>
+      </div>
+
       <div id="links">
         <a href="https://github.com/romanmaksy/etterna-ratings-distribution" target="_blank"><img class="circleButton"
             src="resources/github.png" /></a>

@@ -10,10 +10,7 @@
 body {
 	background-color: #031926;
 	color: white;
-	margin-left: 20px;
-	margin-right: 20px;
-	margin-top: 5px;
-	margin-bottom: 10px;
+	margin: 20px;
 	font-family: "Poppins", sans-serif;
 }
 
@@ -32,7 +29,7 @@ h1 {
 	border-radius: 10px;
 	padding: 10px;
 	margin: 1vmax;
-	margin-bottom: 10px;
+	margin-bottom: 1.5vmax;
 }
 
 #content {
@@ -75,7 +72,10 @@ select {
 
 input[type="checkbox"] {
 	margin-left: 1vmax;
-	margin-right: 1vmax;
+	margin-right: 2vmax;
+	align-self: center;
+	height: 75%;
+	flex: 0;
 }
 
 #playerHighlightInputautocomplete-list {
@@ -107,10 +107,27 @@ input[type="checkbox"] {
 #links {
 	justify-content: center;
 	display: flex;
+	margin: 10px;
+	height: 42px;
+	margin-top: 42px;
 }
 
 .circleButton {
 	width: 32;
 	border-radius: 32px;
 	margin-left: 10px;
+}
+
+.row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 100%;
+}
+
+.col {
+	display: flex;
+	/* flex-direction: column; */
+	flex-basis: 100%;
+	flex: 1;
 }
