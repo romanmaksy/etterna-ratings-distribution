@@ -9,87 +9,92 @@ const SKILLS = [
 	"Technical",
 ];
 
-let skillDataSets = {};
+let userDataSet = [];
 
-async function readCSVFiles() {
+function readCSVFiles() {
 	SlickLoader.enable();
 
-	let csvLoadingPromises = [];
+	// load csv from file
+	Plotly.d3.csv(
+		`./resources/csv/EtternaUserData.csv`,
+		function (d) {
+			return {
+				username: d.username,
+				Overall: +d.Overall,
+				Stamina: +d.Stamina,
+				Stream: +d.Stream,
+				Jumpstream: +d.Jumpstream,
+				Handstream: +d.Handstream,
+				Jacks: +d.Jacks,
+				Chordjacks: +d.Chordjacks,
+				Technical: +d.Technical,
+			};
+		},
+		function (error, data) {
+			userDataSet = data;
 
-	SKILLS.forEach((skill, i) => {
-		csvLoadingPromises.push(
-			new Promise((resolve, error) => {
-				Plotly.d3.csv(
-					`./resources/${skill}Rankings.csv`,
-					function (d) {
-						return {
-							username: d.username,
-							score: +d.score,
-							percentile: +d.percentile,
-						};
-					},
-					function (error, data) {
-						skillDataSets[skill] = data;
-						resolve();
-					}
+			// set up autocomplete
+			if (!autocompleteInitialized) {
+				autocomplete(
+					document.getElementById("playerHighlightInput"),
+					userDataSet.map((row) => row.username)
 				);
-			})
-		);
-	});
+			}
 
-	// set last update subheading text
-	csvLoadingPromises.push(
-		fetch(`./resources/OverallRankings.csv`).then((r) => {
-			document.getElementById("lastUpdated").innerHTML =
-				"last data fetched on " + r.headers.get("Last-Modified").slice(0, -13);
-		})
+			recalculateGraph();
+		}
 	);
 
-	// wait for all these async tasks to finish
-	await Promise.all(csvLoadingPromises);
-
-	// set up autocomplete
-	if (!autocompleteInitialized) {
-		autocomplete(
-			document.getElementById("playerHighlightInput"),
-			skillDataSets["Overall"].map((row) => row.username)
-		);
-	}
-
-	// now initial load is complete, we can render the graph
-	recalculateGraph();
+	// set last update subheading text
+	fetch(`./resources/csv/EtternaUserData.csv`).then((r) => {
+		document.getElementById("lastUpdated").innerHTML =
+			"last data fetched on " + r.headers.get("Last-Modified").slice(0, -13);
+	})
 }
 
-async function recalculateGraph() {
+function recalculateGraph() {
 	SlickLoader.enable();
 
 	// grab latest data from inputs
 	updateInputsData();
 
 	// process scores, bins + highlighted player
-	let scoreEntries = skillDataSets[skill].filter(
-		(row) => row.score >= minScore && row.score <= maxScore
-	);
-	let binData = calculateBins(scoreEntries);
-	let highlightedPlayerData = calculateHighlightedPlayerInfo(scoreEntries, binData);
+	let processedDataSet = getProcessedDataSet()
+	let binData = calculateBins(processedDataSet);
+	let highlightedPlayerData = calculateHighlightedPlayerInfo(processedDataSet, binData);
 
 	// pass along all this info into graph
-	MakeGraph(scoreEntries, binData, highlightedPlayerData);
+	MakeGraph(processedDataSet, binData, highlightedPlayerData);
 }
 
-function calculateBins(scoreEntries) {
+function getProcessedDataSet() {
+	let processedDataSet = userDataSet.filter(
+		(row) => row[skill] >= minScore && row[skill] <= maxScore
+	);
+
+	processedDataSet = processedDataSet.sort(function (a, b) {
+		return a[skill] - b[skill];
+	});
+
+	scoresList = processedDataSet.map(row => row[skill])
+	processedDataSet.forEach(row => row.percentile = 100 * percentRank(scoresList, row[skill]));
+
+	return processedDataSet
+}
+
+function calculateBins(processedDataSet) {
 	let currentBin = minScore + binSize;
 	let scoresInBin = 0;
 	let binData = [];
 
 	// scores in ascending order, go through them and make bin each time we hit new binsize
-	for (var i = 0; i < scoreEntries.length; i++) {
+	for (var i = 0; i < processedDataSet.length; i++) {
 		scoresInBin++;
 
-		while (Math.round(scoreEntries[i].score * 1000000) >= Math.round(currentBin * 1000000)) {
+		while (Math.round(processedDataSet[i][skill] * 1000000) >= Math.round(currentBin * 1000000)) {
 			binData.push({
 				size: currentBin,
-				percentile: scoreEntries[Math.max(0, i - 1)].percentile,
+				percentile: processedDataSet[Math.max(0, i - 1)].percentile,
 				scoresInBin: scoresInBin,
 			});
 
@@ -101,29 +106,29 @@ function calculateBins(scoreEntries) {
 	// add last element since we won't hit it in loop
 	binData.push({
 		size: currentBin,
-		percentile: scoreEntries[scoreEntries.length - 1].percentile,
+		percentile: processedDataSet[processedDataSet.length - 1].percentile,
 		scoresInBin: scoresInBin,
 	});
 
 	return binData;
 }
 
-function calculateHighlightedPlayerInfo(scoreEntries, binData) {
+function calculateHighlightedPlayerInfo(processedDataSet, binData) {
 	let playerToHighlight = null;
-	let highlightedScoreEntry = scoreEntries.find((score) => score.username == highlightedPlayerName);
+	let highlightedScoreEntry = processedDataSet.find(row => row.username == highlightedPlayerName);
 
 	if (highlightedScoreEntry) {
 		let binIndex = 0;
 
 		for (binIndex; binIndex < binData.length; binIndex++) {
-			if (binData[binIndex].size > highlightedScoreEntry.score) {
+			if (binData[binIndex].size > highlightedScoreEntry[skill]) {
 				break;
 			}
 		}
 
 		playerToHighlight = {
 			name: highlightedScoreEntry.username,
-			score: highlightedScoreEntry.score,
+			score: highlightedScoreEntry[skill],
 			binIndex: binIndex,
 			barHeight: binData[binIndex].scoresInBin,
 			percentile: highlightedScoreEntry.percentile,
@@ -133,9 +138,9 @@ function calculateHighlightedPlayerInfo(scoreEntries, binData) {
 	return playerToHighlight;
 }
 
-function MakeGraph(scoreData, binData, playerToHighlight) {
+function MakeGraph(processedDataSet, binData, playerToHighlight) {
 	// plotly specific data processing
-	let scores = scoreData.map((entry) => entry.score);
+	let scores = processedDataSet.map((entry) => entry[skill]);
 	let highestScore = Math.max(...scores);
 	let tallestBinHeight = Math.max(...binData.map((binInfo) => binInfo.scoresInBin));
 	let colors = [];
@@ -252,11 +257,10 @@ function MakeGraph(scoreData, binData, playerToHighlight) {
 
 	// add annotation for highlighted player if required
 	if (playerToHighlight) {
-		let displayText = `<b><i>${playerToHighlight.name}</i></b><br>${
-			skillSetSelect[skillSetSelect.selectedIndex].text
-		}: ${playerToHighlight.score.toFixed(2)}<br>Percentile: ${playerToHighlight.percentile.toFixed(
-			2
-		)}%`;
+		let displayText = `<b><i>${playerToHighlight.name}</i></b><br>${skillSetSelect[skillSetSelect.selectedIndex].text
+			}: ${playerToHighlight.score.toFixed(2)}<br>Percentile: ${playerToHighlight.percentile.toFixed(
+				2
+			)}%`;
 
 		annotations.push({
 			text: displayText,
@@ -285,6 +289,29 @@ function MakeGraph(scoreData, binData, playerToHighlight) {
 			SlickLoader.disable();
 		}
 	);
+}
+
+function percentRank(arr, value) {
+	for (let i = 0; i < arr.length; i++) {
+		if (arr[i] === value) {
+			return i / (arr.length - 1);
+		}
+	}
+
+	// calculate value using linear interpolation
+	let x1, x2, y1, y2;
+
+	for (let i = 0; i < arr.length - 1; i++) {
+		if (arr[i] < value && value < arr[i + 1]) {
+			x1 = arr[i];
+			x2 = arr[i + 1];
+			y1 = percentRank(arr, x1);
+			y2 = percentRank(arr, x2);
+			return ((x2 - value) * y1 + (value - x1) * y2) / (x2 - x1);
+		}
+	}
+
+	throw new Error("Out of bounds");
 }
 
 readCSVFiles();
