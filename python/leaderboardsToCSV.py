@@ -29,7 +29,7 @@ def main():
     df["username"] = df["username"].str.extract('user\/(.*?)"')
     # TODO for each user, fetch user id if doesn't exist and use that to fetch last score submission date from score/userScores
 
-    df.to_csv("./resources/csv/EtternaUserData.csv")
+    df.to_csv("./resources/csv/EtternaUserData.csv", index=False)
     print("finished")
 
 
