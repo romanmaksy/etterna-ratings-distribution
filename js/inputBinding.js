@@ -19,6 +19,11 @@ showAverageInput.addEventListener("change", onInputsChanged);
 let playerHighlightInput = document.getElementById("playerHighlightInput");
 playerHighlightInput.addEventListener("change", onInputsChanged);
 
+let isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
+
+if (!isMobile)
+	showMedianInput.checked = true;
+
 let showMedian = showMedianInput.checked;
 let showAverage = showAverageInput.checked;
 let highlightedPlayerName = playerHighlightInput.value;

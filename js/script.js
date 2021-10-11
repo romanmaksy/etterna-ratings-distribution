@@ -9,7 +9,7 @@ const SKILLS = [
 	"Technical",
 ];
 
-let userDataSet = [];
+let fullDataSet = [];
 
 function readCSVFiles() {
 	SlickLoader.enable();
@@ -31,13 +31,13 @@ function readCSVFiles() {
 			};
 		},
 		function (error, data) {
-			userDataSet = data;
+			fullDataSet = data;
 
 			// set up autocomplete
 			if (!autocompleteInitialized) {
 				autocomplete(
 					document.getElementById("playerHighlightInput"),
-					userDataSet.map((row) => row.username)
+					fullDataSet.map((row) => row.username)
 				);
 			}
 
@@ -68,7 +68,7 @@ function recalculateGraph() {
 }
 
 function getProcessedDataSet() {
-	let processedDataSet = userDataSet.filter(
+	let processedDataSet = fullDataSet.filter(
 		(row) => row[skill] >= minScore && row[skill] <= maxScore
 	);
 
@@ -170,8 +170,6 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 			},
 		},
 	];
-
-	let isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 
 	// set up and style everything outside of the bars themselves
 	var layout = {
