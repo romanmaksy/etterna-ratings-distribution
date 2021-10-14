@@ -77,7 +77,7 @@ function getProcessedDataSet() {
 
 	// filter rows by score range
 	if (minScore < maxScore) {
-		let processedDataSet = fullDataSet.filter(
+		processedDataSet = fullDataSet.filter(
 			(row) => row[skill] >= minScore && row[skill] <= maxScore
 		);
 	}
@@ -285,8 +285,8 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 			bgcolor: "rgba(0,0,0,.8)",
 			x: playerToHighlight.score,
 			y: playerToHighlight.barHeight,
-			ax: playerToHighlight.score + binSize + 0.1 * binSize * binData.length,
-			ay: playerToHighlight.barHeight + 50 * binSize,
+			ax: playerToHighlight.score + 0.025 * binSize * binData.length,
+			ay: playerToHighlight.barHeight + tallestBinHeight * 0.1,
 			axref: "x",
 			ayref: "y",
 			arrowcolor: "rgb(200, 200, 200)",
