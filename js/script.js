@@ -99,6 +99,11 @@ function getProcessedDataSet() {
 		);
 	}
 
+	// filter rows by country
+	if (country != "") {
+		processedDataSet = processedDataSet.filter((row) => row.country === country);
+	}
+
 	processedDataSet = processedDataSet.sort(function (a, b) {
 		return a[skill] - b[skill];
 	});

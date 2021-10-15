@@ -22,6 +22,9 @@ playerHighlightInput.addEventListener("change", onInputsChanged);
 let activeAfterInput = document.getElementById("activeAfterInput");
 activeAfterInput.addEventListener("change", onInputsChanged);
 
+let countryInput = document.getElementById("countryInput");
+countryInput.addEventListener("change", onInputsChanged);
+
 let isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 
 if (!isMobile) showMedianInput.checked = true;
@@ -34,6 +37,7 @@ let skill = skillSetSelect.value;
 let minScore = minScoreInput.value;
 let maxScore = maxScoreInput.value;
 let activeAfter = activeAfterInput.value;
+let country = countryInput.value;
 
 function onInputsChanged(e) {
 	recalculateGraph();
@@ -51,4 +55,5 @@ function updateInputsData() {
 	maxScore = Math.max(0, parseFloat(maxScoreInput.value || 40));
 	maxScoreInput.value = maxScore;
 	activeAfter = new Date(activeAfterInput.value);
+	country = countryInput.value;
 }
