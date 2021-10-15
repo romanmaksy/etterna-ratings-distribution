@@ -144,6 +144,10 @@ function calculateBins(processedDataSet) {
 		scoresInBin: scoresInBin,
 	});
 
+	// remove first empty bins beacuse plotly ignores empty bins before first datapoint for some reason
+	let index = binData.findIndex((bin) => bin.scoresInBin > 0);
+	if (index > 0) binData = binData.slice(index);
+
 	return binData;
 }
 
@@ -184,17 +188,12 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 		colors.push(playerToHighlight && i == playerToHighlight.binIndex ? "#7EC13E" : "#C13E7E");
 	}
 
-	// for some reason plotly counts empty bins after first entry but not before
-	binPercentileTexts = binData.map((bin) => bin.percentile);
-	let index = binData.findIndex((bin) => bin.scoresInBin > 0);
-	if (index > 0) binPercentileTexts = binPercentileTexts.slice(index);
-
 	// set up data for plotly to render the bars
 	let data = [
 		{
 			x: scores,
 			type: "histogram",
-			text: binPercentileTexts,
+			text: binData.map((bin) => bin.percentile),
 			xbins: {
 				start: minScore,
 				size: binSize,
