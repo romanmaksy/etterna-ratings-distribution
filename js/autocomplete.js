@@ -111,8 +111,4 @@ function autocomplete(inp, arr) {
 	document.addEventListener("click", function (e) {
 		closeAllLists(e.target);
 	});
-
-	autocompleteInitialized = true;
 }
-
-/*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/

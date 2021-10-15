@@ -29,6 +29,7 @@ function readCSVFiles() {
 				Chordjacks: +d.Chordjacks,
 				Technical: +d.Technical,
 				lastActive: new Date(d.lastActive),
+				country: d.country,
 			};
 		},
 		function (error, data) {
@@ -38,8 +39,13 @@ function readCSVFiles() {
 			if (!autocompleteInitialized) {
 				autocomplete(
 					document.getElementById("playerHighlightInput"),
-					fullDataSet.map((row) => row.username)
+					fullDataSet.map((row) => row.username).filter(onlyUnique)
 				);
+				autocomplete(
+					document.getElementById("countryInput"),
+					fullDataSet.map((row) => row.country).filter(onlyUnique)
+				);
+				autocompleteInitialized = true;
 			}
 			recalculateGraph();
 		}
@@ -93,6 +99,11 @@ function getProcessedDataSet() {
 		);
 	}
 
+	// filter rows by country
+	if (country != "") {
+		processedDataSet = processedDataSet.filter((row) => row.country === country);
+	}
+
 	processedDataSet = processedDataSet.sort(function (a, b) {
 		return a[skill] - b[skill];
 	});
@@ -132,6 +143,10 @@ function calculateBins(processedDataSet) {
 		percentile: processedDataSet[processedDataSet.length - 1].percentile,
 		scoresInBin: scoresInBin,
 	});
+
+	// remove first empty bins beacuse plotly ignores empty bins before first datapoint for some reason
+	let index = binData.findIndex((bin) => bin.scoresInBin > 0);
+	if (index > 0) binData = binData.slice(index);
 
 	return binData;
 }
@@ -173,17 +188,12 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 		colors.push(playerToHighlight && i == playerToHighlight.binIndex ? "#7EC13E" : "#C13E7E");
 	}
 
-	// for some reason plotly counts empty bins after first entry but not before
-	binPercentileTexts = binData.map((bin) => bin.percentile);
-	let index = binData.findIndex((bin) => bin.scoresInBin > 0);
-	if (index > 0) binPercentileTexts = binPercentileTexts.slice(index);
-
 	// set up data for plotly to render the bars
 	let data = [
 		{
 			x: scores,
 			type: "histogram",
-			text: binPercentileTexts,
+			text: binData.map((bin) => bin.percentile),
 			xbins: {
 				start: minScore,
 				size: binSize,
@@ -236,6 +246,21 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 
 	// add average and median annotations if required
 	let annotations = [];
+
+	annotations.push({
+		xref: "paper",
+		yref: "paper",
+		x: 1,
+		xanchor: "right",
+		y: 1,
+		yanchor: "top",
+		text: `total players: ${scores.length}`,
+		showarrow: false,
+		font: {
+			color: "white",
+			size: 12,
+		},
+	});
 
 	if (showMedian) {
 		const middle = Math.floor(scores.length / 2);
@@ -340,6 +365,10 @@ function percentRank(arr, value) {
 	}
 
 	throw new Error("Out of bounds");
+}
+
+function onlyUnique(value, index, self) {
+	return self.indexOf(value) === index;
 }
 
 readCSVFiles();
