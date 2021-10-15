@@ -48,7 +48,7 @@ function updateInputsData() {
 	skill = skillSetSelect.value;
 	minScore = Math.max(0, parseFloat(minScoreInput.value || 0));
 	minScoreInput.value = minScore;
-	maxScore = Math.max(minScore + 0.01, parseFloat(maxScoreInput.value || 40));
+	maxScore = Math.max(0, parseFloat(maxScoreInput.value || 40));
 	maxScoreInput.value = maxScore;
 	activeAfter = new Date(activeAfterInput.value);
 }
