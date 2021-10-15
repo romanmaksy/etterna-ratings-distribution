@@ -103,9 +103,7 @@ input[type="checkbox"] {
 #links {
 	justify-content: center;
 	display: flex;
-	margin: 10px;
-	height: 42px;
-	margin-top: 42px;
+	margin: 20px;
 }
 
 .circleButton {

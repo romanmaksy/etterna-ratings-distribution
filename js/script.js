@@ -36,16 +36,20 @@ function readCSVFiles() {
 			fullDataSet = data;
 
 			// set up autocomplete
-			if (!autocompleteInitialized) {
+			if (!listsInitialized) {
+				populateSelect("skillSetSelect", SKILLS);
+				populateSelect(
+					"countryInput",
+					fullDataSet
+						.map((row) => row.country)
+						.filter(onlyUnique)
+						.sort()
+				);
 				autocomplete(
 					document.getElementById("playerHighlightInput"),
 					fullDataSet.map((row) => row.username).filter(onlyUnique)
 				);
-				autocomplete(
-					document.getElementById("countryInput"),
-					fullDataSet.map((row) => row.country).filter(onlyUnique)
-				);
-				autocompleteInitialized = true;
+				listsInitialized = true;
 			}
 			recalculateGraph();
 		}

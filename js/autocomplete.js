@@ -1,4 +1,4 @@
-let autocompleteInitialized = false;
+let listsInitialized = false;
 const MAX_SUGGESTIONS = 4;
 
 function autocomplete(inp, arr) {
@@ -110,5 +110,16 @@ function autocomplete(inp, arr) {
 	/*execute a function when someone clicks in the document:*/
 	document.addEventListener("click", function (e) {
 		closeAllLists(e.target);
+	});
+}
+
+function populateSelect(selectId, options) {
+	let parent = document.getElementById(selectId);
+
+	options.forEach((option) => {
+		var opt = document.createElement("option");
+		opt.value = option;
+		opt.innerHTML = option;
+		parent.appendChild(opt);
 	});
 }
