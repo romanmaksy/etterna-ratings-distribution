@@ -16,7 +16,7 @@ function readCSVFiles() {
 
 	// load csv from file
 	Plotly.d3.csv(
-		`./resources/csv/EtternaUserData.csv`,
+		`./resources/csv/EtternaUserDataALL.csv`,
 		function (d) {
 			return {
 				username: d.username,
@@ -84,7 +84,9 @@ function getProcessedDataSet() {
 
 	// filter rows by date
 	if (!isNaN(activeAfter)) {
-		processedDataSet = fullDataSet.filter((row) => row.lastActive >= activeAfter);
+		processedDataSet = fullDataSet.filter(
+			(row) => row.lastActive != new Date("1970-01-01") && row.lastActive >= activeAfter
+		);
 	}
 
 	processedDataSet = processedDataSet.sort(function (a, b) {

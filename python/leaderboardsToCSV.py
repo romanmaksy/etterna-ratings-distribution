@@ -1,14 +1,16 @@
-import os
-from threading import Lock
 import concurrent.futures
-import numpy
 import json
+import os
 import re
 import time
-from numpy import dtype
-import requests
-from requests.structures import CaseInsensitiveDict
+from threading import Lock
+
+import numpy
 import pandas
+import requests
+from numpy import dtype
+from requests.structures import CaseInsensitiveDict
+
 pandas.options.mode.chained_assignment = None  # default='warn'
 
 # define mapping from old column name to new
@@ -41,8 +43,7 @@ def main():
     prev_df = pandas.read_csv("./resources/csv/EtternaUserData.csv")
 
     print("fetching leaderboard data")
-    response = requests.get(
-        "https://etternaonline.com/leaderboard/leaderboard")
+    response = requests.get("https://etternaonline.com/leaderboard/leaderboard")
     data = json.loads(response.text)
 
     print("formatting/parsing leaderboard data")
@@ -53,24 +54,19 @@ def main():
     new_df["username"] = new_df["username"].str.extract('user\/(.*?)"')
 
     # add existing previously fetched userids to new leaderboard data (no need to fetch them twice)
-    merged_df = new_df.merge(
-        prev_df[['username', 'userid']], how="left", on="username")
+    merged_df = new_df.merge(prev_df[["username", "userid"]], how="left", on="username")
 
     # since default NaN after merge is float, need to fill with int to convert column into right format
-    merged_df['userid'] = merged_df['userid'].fillna(
-        NAN_INT, downcast='infer')
+    merged_df["userid"] = merged_df["userid"].fillna(NAN_INT, downcast="infer")
 
     # split data into seperate buckets so we can process each chunk in parallel
-    print(
-        f"splitting rows into {MAX_THREADS} buckets, one for each thread to process")
+    print(f"splitting rows into {MAX_THREADS} buckets, one for each thread to process")
     split_dfs = numpy.array_split(merged_df, MAX_THREADS)
 
     # process each bucket on a different thread, then reassemble results once they are all done
     # processing basically means get user id if don't have it, then use that to fetch date of last score submission
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
-        futures = [
-            executor.submit(update_dataframe, df) for df in split_dfs
-        ]
+        futures = [executor.submit(update_dataframe, df) for df in split_dfs]
         concurrent.futures.wait(futures)
         reunited_df = pandas.concat([future.result() for future in futures])
 
@@ -78,7 +74,9 @@ def main():
     reunited_df.to_csv("./resources/csv/EtternaUserData.csv", index=False)
 
     elapsedTime = time.time() - startTime
-    print(f"Processed {len(merged_df.index)} users in {elapsedTime} seconds which is an average of {elapsedTime / len(merged_df.index)} seconds per user.\nAPI requests were limited to {MAX_REQUESTS_PER_SECOND} per second.")
+    print(
+        f"Processed {len(merged_df.index)} users in {elapsedTime} seconds which is an average of {elapsedTime / len(merged_df.index)} seconds per user.\nAPI requests were limited to {MAX_REQUESTS_PER_SECOND} per second."
+    )
 
 
 def update_dataframe(df):
@@ -87,10 +85,13 @@ def update_dataframe(df):
 
 def update_row(row):
     s_print(f"processing row for {row['username']}")
-    if row['userid'] == NAN_INT:
-        row['userid'] = fetch_missing_user_id(row['username'])
-    row['lastActive'] = fetch_last_active_date(row['userid'])
+
+    if row["userid"] == NAN_INT:
+        row["userid"] = fetch_missing_user_id(row["username"])
+
+    row["lastActive"] = fetch_last_active_date(row["userid"])
     s_print(row.to_frame().T)
+
     return row
 
 
@@ -104,6 +105,7 @@ def fetch_missing_user_id(username):
 def fetch_last_active_date(userid):
     rate_limit()
     print(f"getting last active date for userid {userid}")
+
     url = "https://etternaonline.com/score/userScores"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/x-www-form-urlencoded"
@@ -111,7 +113,6 @@ def fetch_last_active_date(userid):
 
     res = requests.post(url, headers=headers, data=data)
     resJson = json.loads(res.text)
-
     if (
         res.status_code == 200
         and "data" in resJson
