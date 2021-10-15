@@ -16,7 +16,7 @@ function readCSVFiles() {
 
 	// load csv from file
 	Plotly.d3.csv(
-		`./resources/csv/EtternaUserDataALL.csv`,
+		`./resources/csv/EtternaUserData.csv`,
 		function (d) {
 			return {
 				username: d.username,
