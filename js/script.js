@@ -248,6 +248,21 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 	// add average and median annotations if required
 	let annotations = [];
 
+	annotations.push({
+		xref: "paper",
+		yref: "paper",
+		x: 1,
+		xanchor: "right",
+		y: 1,
+		yanchor: "top",
+		text: `total players: ${scores.length}`,
+		showarrow: false,
+		font: {
+			color: "white",
+			size: 12,
+		},
+	});
+
 	if (showMedian) {
 		const middle = Math.floor(scores.length / 2);
 		let medianVal =
