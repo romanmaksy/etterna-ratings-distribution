@@ -19,10 +19,12 @@ showAverageInput.addEventListener("change", onInputsChanged);
 let playerHighlightInput = document.getElementById("playerHighlightInput");
 playerHighlightInput.addEventListener("change", onInputsChanged);
 
+let activeAfterInput = document.getElementById("activeAfterInput");
+activeAfterInput.addEventListener("change", onInputsChanged);
+
 let isMobile = window.matchMedia("only screen and (max-width: 760px)").matches;
 
-if (!isMobile)
-	showMedianInput.checked = true;
+if (!isMobile) showMedianInput.checked = true;
 
 let showMedian = showMedianInput.checked;
 let showAverage = showAverageInput.checked;
@@ -31,6 +33,7 @@ let binSize = parseFloat(binSizeInput.value);
 let skill = skillSetSelect.value;
 let minScore = minScoreInput.value;
 let maxScore = maxScoreInput.value;
+let activeAfter = activeAfterInput.value;
 
 function onInputsChanged(e) {
 	recalculateGraph();
@@ -45,6 +48,7 @@ function updateInputsData() {
 	skill = skillSetSelect.value;
 	minScore = Math.max(0, parseFloat(minScoreInput.value || 0));
 	minScoreInput.value = minScore;
-	maxScore = Math.max(minScore + 0.01, parseFloat(maxScoreInput.value || 40));
+	maxScore = Math.max(0, parseFloat(maxScoreInput.value || 40));
 	maxScoreInput.value = maxScore;
+	activeAfter = new Date(activeAfterInput.value);
 }

@@ -1,6 +1,17 @@
+import concurrent.futures
 import json
-import requests
+import os
+import re
+import time
+from threading import Lock
+
+import numpy
 import pandas
+import requests
+from numpy import dtype
+from requests.structures import CaseInsensitiveDict
+
+pandas.options.mode.chained_assignment = None  # default='warn'
 
 # define mapping from old column name to new
 SKILLS = {
@@ -14,23 +25,119 @@ SKILLS = {
     "Technical": "Technical",
 }
 
+# constants and globals
+MAX_THREADS = min(32, os.cpu_count() + 4)
+MAX_REQUESTS_PER_SECOND = 2
+SECONDS_BETWEEN_REQUESTS = 1 / MAX_REQUESTS_PER_SECOND
+NAN_INT = -9999
+
+last_request_time = 0
+rate_limit_lock = Lock()
+s_print_lock = Lock()
+
 
 def main():
-    # fetch data from etternaonline.com and create a csv from it
-    print("fetching data from etternaonline")
-    response = requests.get(
-        "https://etternaonline.com/leaderboard/leaderboard")
+    startTime = time.time()
 
+    print("loading previous data")
+    prev_df = pandas.read_csv("./resources/csv/EtternaUserData.csv")
+
+    print("fetching leaderboard data")
+    response = requests.get("https://etternaonline.com/leaderboard/leaderboard")
     data = json.loads(response.text)
-    df = pandas.DataFrame.from_records(data["data"])
-    df.rename(columns=SKILLS, inplace=True)
-    df["flag_img"] = df["username"].str.extract('flags\/(.*?)"')
-    df["country"] = df["username"].str.extract('title="(.*?)"')
-    df["username"] = df["username"].str.extract('user\/(.*?)"')
-    # TODO for each user, fetch user id if doesn't exist and use that to fetch last score submission date from score/userScores
 
-    df.to_csv("./resources/csv/EtternaUserData.csv", index=False)
-    print("finished")
+    print("formatting/parsing leaderboard data")
+    new_df = pandas.DataFrame.from_records(data["data"])
+    new_df.rename(columns=SKILLS, inplace=True)
+    new_df["flag_img"] = new_df["username"].str.extract('flags\/(.*?)"')
+    new_df["country"] = new_df["username"].str.extract('title="(.*?)"')
+    new_df["username"] = new_df["username"].str.extract('user\/(.*?)"')
+
+    # add existing previously fetched userids to new leaderboard data (no need to fetch them twice)
+    merged_df = new_df.merge(prev_df[["username", "userid"]], how="left", on="username")
+
+    # since default NaN after merge is float, need to fill with int to convert column into right format
+    merged_df["userid"] = merged_df["userid"].fillna(NAN_INT, downcast="infer")
+
+    # split data into seperate buckets so we can process each chunk in parallel
+    print(f"splitting rows into {MAX_THREADS} buckets, one for each thread to process")
+    split_dfs = numpy.array_split(merged_df, MAX_THREADS)
+
+    # process each bucket on a different thread, then reassemble results once they are all done
+    # processing basically means get user id if don't have it, then use that to fetch date of last score submission
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+        futures = [executor.submit(update_dataframe, df) for df in split_dfs]
+        concurrent.futures.wait(futures)
+        reunited_df = pandas.concat([future.result() for future in futures])
+
+    # save to csv
+    reunited_df.to_csv("./resources/csv/EtternaUserData.csv", index=False)
+
+    elapsedTime = time.time() - startTime
+    print(
+        f"Processed {len(merged_df.index)} users in {elapsedTime} seconds which is an average of {elapsedTime / len(merged_df.index)} seconds per user.\nAPI requests were limited to {MAX_REQUESTS_PER_SECOND} per second."
+    )
+
+
+def update_dataframe(df):
+    return df.apply(update_row, axis=1)
+
+
+def update_row(row):
+    s_print(f"processing row for {row['username']}")
+
+    if row["userid"] == NAN_INT:
+        row["userid"] = fetch_missing_user_id(row["username"])
+
+    row["lastActive"] = fetch_last_active_date(row["userid"])
+    s_print(row.to_frame().T)
+
+    return row
+
+
+def fetch_missing_user_id(username):
+    rate_limit()
+    s_print(f"getting user id for {username}")
+    response = requests.get(f"https://etternaonline.com/user/{username}")
+    return re.search("userid':\s*'(\d+)'", response.text).group(1)
+
+
+def fetch_last_active_date(userid):
+    rate_limit()
+    print(f"getting last active date for userid {userid}")
+
+    url = "https://etternaonline.com/score/userScores"
+    headers = CaseInsensitiveDict()
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
+    data = f"order%5B0%5D%5Bcolumn%5D=5&order%5B0%5D%5Bdir%5D=desc&length=1&userid={userid}"
+
+    res = requests.post(url, headers=headers, data=data)
+    resJson = json.loads(res.text)
+    if (
+        res.status_code == 200
+        and "data" in resJson
+        and len(resJson["data"]) > 0
+        and "datetime" in resJson["data"][0]
+    ):
+        return resJson["data"][0]["datetime"]
+    else:
+        return "1970-01-01"
+
+
+def rate_limit():
+    """Thread safe rate limiting function"""
+    with rate_limit_lock:
+        global last_request_time
+        seconds_since_last = time.time() - last_request_time
+        if seconds_since_last < SECONDS_BETWEEN_REQUESTS:
+            time.sleep(SECONDS_BETWEEN_REQUESTS - seconds_since_last)
+        last_request_time = time.time()
+
+
+def s_print(*a, **b):
+    """Thread safe print function"""
+    with s_print_lock:
+        print(*a, **b)
 
 
 main()

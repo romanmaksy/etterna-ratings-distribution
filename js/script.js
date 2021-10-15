@@ -28,6 +28,7 @@ function readCSVFiles() {
 				Jacks: +d.Jacks,
 				Chordjacks: +d.Chordjacks,
 				Technical: +d.Technical,
+				lastActive: new Date(d.lastActive),
 			};
 		},
 		function (error, data) {
@@ -40,7 +41,6 @@ function readCSVFiles() {
 					fullDataSet.map((row) => row.username)
 				);
 			}
-
 			recalculateGraph();
 		}
 	);
@@ -49,7 +49,7 @@ function readCSVFiles() {
 	fetch(`./resources/csv/EtternaUserData.csv`).then((r) => {
 		document.getElementById("lastUpdated").innerHTML =
 			"last data fetched on " + r.headers.get("Last-Modified").slice(0, -13);
-	})
+	});
 }
 
 function recalculateGraph() {
@@ -59,7 +59,13 @@ function recalculateGraph() {
 	updateInputsData();
 
 	// process scores, bins + highlighted player
-	let processedDataSet = getProcessedDataSet()
+	let processedDataSet = getProcessedDataSet();
+	if (processedDataSet.length == 0) {
+		SlickLoader.disable();
+		alert("no results for these filters - graph will not be updated");
+		return;
+	}
+
 	let binData = calculateBins(processedDataSet);
 	let highlightedPlayerData = calculateHighlightedPlayerInfo(processedDataSet, binData);
 
@@ -68,39 +74,56 @@ function recalculateGraph() {
 }
 
 function getProcessedDataSet() {
-	let processedDataSet = fullDataSet.filter(
+	let processedDataSet = fullDataSet.slice(0);
+
+	// filter rows by score range
+	processedDataSet = processedDataSet.filter(
 		(row) => row[skill] >= minScore && row[skill] <= maxScore
 	);
+
+	// filter rows by date, filtering epoch dates or dates that are clearly too far in the future
+	if (!isNaN(activeAfter)) {
+		earliestDate = new Date("2000-01-01");
+		latestDate = Date.now() + 7;
+		processedDataSet = processedDataSet.filter(
+			(row) =>
+				row.lastActive > earliestDate &&
+				row.lastActive < latestDate &&
+				row.lastActive >= activeAfter
+		);
+	}
 
 	processedDataSet = processedDataSet.sort(function (a, b) {
 		return a[skill] - b[skill];
 	});
 
-	scoresList = processedDataSet.map(row => row[skill])
-	processedDataSet.forEach(row => row.percentile = 100 * percentRank(scoresList, row[skill]));
+	scoresList = processedDataSet.map((row) => row[skill]);
+	processedDataSet.forEach((row) => (row.percentile = 100 * percentRank(scoresList, row[skill])));
 
-	return processedDataSet
+	return processedDataSet;
 }
 
 function calculateBins(processedDataSet) {
+	if (processedDataSet.length == 0) return [];
+
 	let currentBin = minScore + binSize;
 	let scoresInBin = 0;
 	let binData = [];
 
 	// scores in ascending order, go through them and make bin each time we hit new binsize
 	for (var i = 0; i < processedDataSet.length; i++) {
-		scoresInBin++;
-
 		while (Math.round(processedDataSet[i][skill] * 1000000) >= Math.round(currentBin * 1000000)) {
 			binData.push({
 				size: currentBin,
-				percentile: processedDataSet[Math.max(0, i - 1)].percentile,
+				percentile: i == 0 ? 0 : processedDataSet[i - 1].percentile,
 				scoresInBin: scoresInBin,
 			});
 
 			currentBin += binSize;
 			scoresInBin = 0;
 		}
+
+		scoresInBin++;
 	}
 
 	// add last element since we won't hit it in loop
@@ -115,7 +138,7 @@ function calculateBins(processedDataSet) {
 
 function calculateHighlightedPlayerInfo(processedDataSet, binData) {
 	let playerToHighlight = null;
-	let highlightedScoreEntry = processedDataSet.find(row => row.username == highlightedPlayerName);
+	let highlightedScoreEntry = processedDataSet.find((row) => row.username == highlightedPlayerName);
 
 	if (highlightedScoreEntry) {
 		let binIndex = 0;
@@ -150,15 +173,21 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 		colors.push(playerToHighlight && i == playerToHighlight.binIndex ? "#7EC13E" : "#C13E7E");
 	}
 
+	// for some reason plotly counts empty bins after first entry but not before
+	binPercentileTexts = binData.map((bin) => bin.percentile);
+	let index = binData.findIndex((bin) => bin.scoresInBin > 0);
+	if (index > 0) binPercentileTexts = binPercentileTexts.slice(index);
+
 	// set up data for plotly to render the bars
 	let data = [
 		{
 			x: scores,
 			type: "histogram",
-			text: binData.map((binInfo) => binInfo.percentile),
+			text: binPercentileTexts,
 			xbins: {
-				start: 0,
+				start: minScore,
 				size: binSize,
+				end: binData[binData.length - 1].size,
 			},
 			hovertemplate:
 				"Num Players: %{y}<br>" + "Rating: %{x}<br>" + "Percentile: %{text:.2f}%<extra></extra>",
@@ -187,7 +216,7 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 				text: `${skillSetSelect[skillSetSelect.selectedIndex].text} rating`,
 			},
 			dtick: 5,
-			range: [minScore, highestScore + highestScore * 0.15],
+			range: [minScore, binData[binData.length - 1].size * 1.05],
 		},
 		yaxis: {
 			title: {
@@ -255,10 +284,11 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 
 	// add annotation for highlighted player if required
 	if (playerToHighlight) {
-		let displayText = `<b><i>${playerToHighlight.name}</i></b><br>${skillSetSelect[skillSetSelect.selectedIndex].text
-			}: ${playerToHighlight.score.toFixed(2)}<br>Percentile: ${playerToHighlight.percentile.toFixed(
-				2
-			)}%`;
+		let displayText = `<b><i>${playerToHighlight.name}</i></b><br>${
+			skillSetSelect[skillSetSelect.selectedIndex].text
+		}: ${playerToHighlight.score.toFixed(2)}<br>Percentile: ${playerToHighlight.percentile.toFixed(
+			2
+		)}%`;
 
 		annotations.push({
 			text: displayText,
@@ -266,8 +296,8 @@ function MakeGraph(processedDataSet, binData, playerToHighlight) {
 			bgcolor: "rgba(0,0,0,.8)",
 			x: playerToHighlight.score,
 			y: playerToHighlight.barHeight,
-			ax: playerToHighlight.score + binSize + 0.1 * binSize * binData.length,
-			ay: playerToHighlight.barHeight + 50 * binSize,
+			ax: playerToHighlight.score + 0.025 * binSize * binData.length,
+			ay: playerToHighlight.barHeight + tallestBinHeight * 0.1,
 			axref: "x",
 			ayref: "y",
 			arrowcolor: "rgb(200, 200, 200)",

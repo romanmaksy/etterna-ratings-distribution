@@ -131,3 +131,7 @@ input[type="checkbox"] {
 	flex-basis: 100%;
 	flex: 1;
 }
+
+::-webkit-calendar-picker-indicator {
+	filter: invert(1);
+}
