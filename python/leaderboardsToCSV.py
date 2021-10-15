@@ -75,7 +75,10 @@ def main():
 
     elapsedTime = time.time() - startTime
     print(
-        f"Processed {len(merged_df.index)} users in {elapsedTime} seconds which is an average of {elapsedTime / len(merged_df.index)} seconds per user.\nAPI requests were limited to {MAX_REQUESTS_PER_SECOND} per second."
+        f"Processed {len(merged_df.index)} users in {elapsedTime} seconds which is an average of {elapsedTime / len(merged_df.index)} seconds per user."
+    )
+    print(
+        f"MAX_THREADS was set to {MAX_THREADS}, and API requests were limited to {MAX_REQUESTS_PER_SECOND} per second."
     )
 
 
