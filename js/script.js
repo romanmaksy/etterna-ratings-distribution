@@ -29,6 +29,7 @@ function readCSVFiles() {
 				Chordjacks: +d.Chordjacks,
 				Technical: +d.Technical,
 				lastActive: new Date(d.lastActive),
+				country: d.country,
 			};
 		},
 		function (error, data) {
@@ -38,8 +39,13 @@ function readCSVFiles() {
 			if (!autocompleteInitialized) {
 				autocomplete(
 					document.getElementById("playerHighlightInput"),
-					fullDataSet.map((row) => row.username)
+					fullDataSet.map((row) => row.username).filter(onlyUnique)
 				);
+				autocomplete(
+					document.getElementById("countryInput"),
+					fullDataSet.map((row) => row.country).filter(onlyUnique)
+				);
+				autocompleteInitialized = true;
 			}
 			recalculateGraph();
 		}
@@ -340,6 +346,10 @@ function percentRank(arr, value) {
 	}
 
 	throw new Error("Out of bounds");
+}
+
+function onlyUnique(value, index, self) {
+	return self.indexOf(value) === index;
 }
 
 readCSVFiles();

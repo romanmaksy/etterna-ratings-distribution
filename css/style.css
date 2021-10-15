@@ -45,6 +45,7 @@ h1 {
 	margin-right: 0.5vmax;
 	margin-bottom: 10px;
 	display: flex;
+	align-items: center;
 }
 
 label {
@@ -78,18 +79,17 @@ input[type="checkbox"] {
 	flex: 0;
 }
 
-#playerHighlightInputautocomplete-list {
+.autocomplete-items {
 	position: absolute;
 	top: 25px;
 	left: 0;
 	right: 0;
-}
-
-.autocomplete-items div {
 	padding: 5px;
 	cursor: pointer;
 	background-color: #020e15;
 	color: whitesmoke;
+
+	z-index: 1;
 }
 .autocomplete-items div:hover {
 	background-color: #062536;
@@ -98,10 +98,6 @@ input[type="checkbox"] {
 	/*when navigating through the items using the arrow keys:*/
 	background-color: #093650 !important;
 	color: #ffffff;
-}
-
-#bmc-wbtn {
-	top: 18px;
 }
 
 #links {
