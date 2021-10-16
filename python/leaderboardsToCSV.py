@@ -27,7 +27,7 @@ SKILLS = {
 
 # constants and globals
 MAX_THREADS = min(32, os.cpu_count() + 4)
-MAX_REQUESTS_PER_SECOND = 2
+MAX_REQUESTS_PER_SECOND = 1.5
 SECONDS_BETWEEN_REQUESTS = 1 / MAX_REQUESTS_PER_SECOND
 NAN_INT = -9999
 
@@ -54,7 +54,9 @@ def main():
     new_df["username"] = new_df["username"].str.extract('user\/(.*?)"')
 
     # add existing previously fetched userids to new leaderboard data (no need to fetch them twice)
-    merged_df = new_df.merge(prev_df[["username", "userid"]], how="left", on="username")
+    merged_df = new_df.merge(
+        prev_df[["username", "userid", "lastActive"]], how="left", on="username"
+    )
 
     # since default NaN after merge is float, need to fill with int to convert column into right format
     merged_df["userid"] = merged_df["userid"].fillna(NAN_INT, downcast="infer")
@@ -92,7 +94,7 @@ def update_row(row):
     if row["userid"] == NAN_INT:
         row["userid"] = fetch_missing_user_id(row["username"])
 
-    row["lastActive"] = fetch_last_active_date(row["userid"])
+    row["lastActive"] = fetch_last_active_date(row["userid"], row["lastActive"])
     s_print(row.to_frame().T)
 
     return row
@@ -101,11 +103,16 @@ def update_row(row):
 def fetch_missing_user_id(username):
     rate_limit()
     s_print(f"getting user id for {username}")
-    response = requests.get(f"https://etternaonline.com/user/{username}")
-    return re.search("userid':\s*'(\d+)'", response.text).group(1)
+    try:
+        response = requests.get(f"https://etternaonline.com/user/{username}")
+        response.raise_for_status()
+        return re.search("userid':\s*'(\d+)'", response.text).group(1)
+    except Exception as e:
+        s_print(f"error getting user id for {username}. error: {e}")
+        return NAN_INT
 
 
-def fetch_last_active_date(userid):
+def fetch_last_active_date(userid, lastActive):
     rate_limit()
     print(f"getting last active date for userid {userid}")
 
@@ -114,17 +121,16 @@ def fetch_last_active_date(userid):
     headers["Content-Type"] = "application/x-www-form-urlencoded"
     data = f"order%5B0%5D%5Bcolumn%5D=5&order%5B0%5D%5Bdir%5D=desc&length=1&userid={userid}"
 
-    res = requests.post(url, headers=headers, data=data)
-    resJson = json.loads(res.text)
-    if (
-        res.status_code == 200
-        and "data" in resJson
-        and len(resJson["data"]) > 0
-        and "datetime" in resJson["data"][0]
-    ):
-        return resJson["data"][0]["datetime"]
-    else:
-        return "1970-01-01"
+    try:
+        response = requests.post(url, headers=headers, data=data)
+        response.raise_for_status()
+        responseJson = json.loads(response.text)
+        return responseJson["data"][0]["datetime"]
+    except Exception as e:
+        s_print(
+            f"error getting last score submission date for userid {userid}. error: {e}"
+        )
+        return "1970-01-01" if pandas.isna(lastActive) else lastActive
 
 
 def rate_limit():
